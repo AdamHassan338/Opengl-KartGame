@@ -22,10 +22,11 @@ Source code drawn from a number of sources and examples, including contributions
  Dr Eddie Edwards (Philip.Edwards@city.ac.uk)
 
 */
-
+#define _CRT_SECURE_NO_WARNINGS
 
 #include "game.h"
-
+#include "stdio.h"
+#include <iostream>
 
 // Setup includes
 #include "HighResolutionTimer.h"
@@ -411,7 +412,7 @@ void Game::Update()
 	float y = 15;
 	glm::vec3 position = { 25,15,150 };
 
-	double angularV = 1.0;
+	double angularS = 1.0;
 
 	position.x += distance * sin(theta);
 	position.z += distance * cos(theta);
@@ -419,7 +420,7 @@ void Game::Update()
 	m_pCamera->Set(position, glm::vec3(25.0f, 0.0f, 150.0f),glm::vec3(0,1,0));
 
 	m_pAudio->Update();
-	theta += angularV * m_dt/(double)1000;
+	theta += angularS * m_dt/(double)1000;
 
 /*
 static float t = 0.0f;
@@ -609,6 +610,10 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE, PSTR, int)
 {
 	Game &game = Game::GetInstance();
 	game.SetHinstance(hinstance);
-
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+	printf("Debugging Window:\n");
 	return int(game.Execute());
 }
