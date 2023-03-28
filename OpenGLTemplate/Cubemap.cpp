@@ -58,6 +58,7 @@ bool CCubemap::LoadTexture(string filename, BYTE **bmpBytes, int &iWidth, int &i
 }
 
 // Binds a texture for rendering
+
 void CCubemap::Bind(int iTextureUnit)
 {
 	glActiveTexture(GL_TEXTURE0+iTextureUnit);

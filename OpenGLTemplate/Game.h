@@ -19,6 +19,7 @@ class COpenAssetImportMesh;
 class CAudio;
 class CCatmullRom;
 class MyObject;
+class CCube;
 
 class Game {
 private:
@@ -35,11 +36,13 @@ private:
 	CFreeTypeFont *m_pFtFont;
 	COpenAssetImportMesh *m_pBarrelMesh;
 	COpenAssetImportMesh *m_pHorseMesh;
+	COpenAssetImportMesh* m_pFigherMesh;
 	CSphere *m_pSphere;
 	CHighResolutionTimer *m_pHighResolutionTimer;
 	CAudio *m_pAudio;
 	CCatmullRom* m_pCatmullRom;
 	MyObject* m_object;
+	CCube* m_pCube;
 
 	// Some other member variables
 	double m_dt;
@@ -73,5 +76,8 @@ private:
 	int m_frameCount;
 	double m_elapsedTime;
 
+	float m_t;
+	glm::vec3 m_spaceShipPosition;
+	glm::mat4 m_spaceShipOrientation;
 
 };
