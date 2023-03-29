@@ -107,6 +107,8 @@ void Game::Initialise()
 	m_t = 0;
 	m_spaceShipPosition = glm::vec3(0);
 	m_spaceShipOrientation = glm::mat4(1);
+
+	m_currentDistance = 0.0f;
 	// Set the clear colour and depth
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(1.0f);
@@ -126,7 +128,9 @@ void Game::Initialise()
 	m_pCatmullRom = new CCatmullRom;
 	m_pCube = new CCube;
 	
-	m_pCatmullRom->CreatePath(p0,p1,p2,p3);
+	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
+	m_pCatmullRom->CreateCentreline();
+	m_pCatmullRom->CreateOffsetCurves();
 
 	RECT dimensions = m_gameWindow.GetDimensions();
 
@@ -384,6 +388,18 @@ void Game::Render()
 		//m_pSphere->Render();
 	modelViewMatrixStack.Pop();
 
+	// RENDER THE SPLINE
+	modelViewMatrixStack.Push();
+	pMainProgram->SetUniform("bUseTexture", false); // turn off texturing
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix",
+		m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	// Render your object here
+		//m_pCatmullRom->RenderPath();
+	m_pCatmullRom->RenderCentreline();
+	m_pCatmullRom->RenderOffsetCurves();
+	modelViewMatrixStack.Pop();
+
 
 	// Use the my shader program 
 	pMainProgram = (*m_pShaderPrograms)[2];
@@ -412,15 +428,7 @@ void Game::Render()
 
 
 
-	// RENDER THE SPLINE
-	modelViewMatrixStack.Push();
-		pMainProgram->SetUniform("bUseTexture", false); // turn off texturing
-		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("matrices.normalMatrix",
-		m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	// Render your object here
-		m_pCatmullRom->RenderPath();
-	modelViewMatrixStack.Pop();
+
 
 
 		
@@ -438,15 +446,35 @@ void Game::Update()
 	//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
 	m_pCamera->Update(m_dt);
 
+	m_currentDistance += m_dt * 0.1f;
+	glm::vec3 p;
+	glm::vec3 pNext;
+	m_pCatmullRom->Sample(m_currentDistance, p);
+	m_pCatmullRom->Sample(m_currentDistance + 1.0f, pNext);
+	glm::vec3 t = glm::normalize(pNext - p);
+
+	glm::vec3 n = glm::normalize(glm::cross(t,glm::vec3(0,1,0)));
+	glm::vec3 b = glm::normalize(glm::cross(n,t));
+
+	float w = 10.0f;
+
+
+	glm::vec3 l = p - (w / 2) * n;
+	glm::vec3 r = p + (w / 2) * n;
+
+	p.y += 5.0f;
+	m_pCamera->Set(p, 10.0f* t + p , glm::vec3(0, 1, 0));
+
 	m_t += 0.001f * (float)m_dt;
-	float r = 75.0f;
+
+	float radius = 75.0f;
 	glm::vec3 x = glm::vec3(1, 0, 0);
 	glm::vec3 y = glm::vec3(0, 1, 0);
 	glm::vec3 z = glm::vec3(0, 0, 1);
-	m_spaceShipPosition = r * cos(m_t) * x + 50.0f * y + r * sin(m_t) * z;
+	m_spaceShipPosition = radius * cos(m_t) * x + 50.0f * y + radius * sin(m_t) * z;
 
 
-	glm::vec3 T = glm::normalize(-r * sin(m_t) * x + r * cos(m_t) * z);
+	glm::vec3 T = glm::normalize(-radius * sin(m_t) * x + radius * cos(m_t) * z);
 	glm::vec3 N = glm::normalize(glm::cross(T, y));
 	glm::vec3 B = glm::normalize(glm::cross(N, T));
 

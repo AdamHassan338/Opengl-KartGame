@@ -69,4 +69,5 @@ void CCube::Release()
 	m_texture.Release();
 	glDeleteVertexArrays(1, &m_vao);
 	m_vbo.Release();
-}
+}
+ 
