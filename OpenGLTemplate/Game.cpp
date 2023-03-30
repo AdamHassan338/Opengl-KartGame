@@ -107,6 +107,7 @@ void Game::Initialise()
 	m_t = 0;
 	m_spaceShipPosition = glm::vec3(0);
 	m_spaceShipOrientation = glm::mat4(1);
+	m_cameraRotation = 0;
 
 	m_currentDistance = 0.0f;
 	// Set the clear colour and depth
@@ -131,6 +132,7 @@ void Game::Initialise()
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
 	m_pCatmullRom->CreateOffsetCurves();
+	m_pCatmullRom->CreateTrack();
 
 	RECT dimensions = m_gameWindow.GetDimensions();
 
@@ -398,6 +400,7 @@ void Game::Render()
 		//m_pCatmullRom->RenderPath();
 	m_pCatmullRom->RenderCentreline();
 	m_pCatmullRom->RenderOffsetCurves();
+	m_pCatmullRom->RenderTrack();
 	modelViewMatrixStack.Pop();
 
 
@@ -463,7 +466,19 @@ void Game::Update()
 	glm::vec3 r = p + (w / 2) * n;
 
 	p.y += 5.0f;
-	m_pCamera->Set(p, 10.0f* t + p , glm::vec3(0, 1, 0));
+
+	if (rotateRight) {
+		m_cameraRotation += m_rotationSpeed * m_dt;
+	}
+
+	if (rotateLeft) {
+		m_cameraRotation -= m_rotationSpeed * m_dt;
+	}
+	
+
+	glm::vec3 up = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, t);
+
+	m_pCamera->Set(p, 10.0f* t + p , up);
 
 	m_t += 0.001f * (float)m_dt;
 
@@ -653,6 +668,25 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 		case VK_F1:
 			m_pAudio->PlayEventSound();
 			break;
+		case VK_LEFT:
+			rotateLeft = true;
+			break;
+		case VK_RIGHT:
+			rotateRight = true;
+			break;
+		}
+		
+		break;
+
+	case WM_KEYUP:
+		switch (w_param) {
+		case VK_LEFT:
+			rotateLeft = false;
+			break;
+		case VK_RIGHT:
+			rotateRight = false;
+			break;
+		
 		}
 		break;
 

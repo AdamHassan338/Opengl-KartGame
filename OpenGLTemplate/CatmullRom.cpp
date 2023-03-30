@@ -209,7 +209,7 @@ void CCatmullRom::CreateOffsetCurves()
 	glBindVertexArray(m_vaoLeftOffsetCurve);
 	m_vboLL.Create();
 	m_vboLL.Bind();
-
+	float w = 20.0f;
 	for (int i = 0; i < m_centrelinePoints.size(); i++) {
 		glm::vec3 p = m_centrelinePoints[i];
 		glm::vec3 pNext = m_centrelinePoints[(i+1) % m_centrelinePoints.size()];
@@ -219,7 +219,7 @@ void CCatmullRom::CreateOffsetCurves()
 		glm::vec3 t = glm::normalize(pNext - p);
 		glm::vec3 n = glm::normalize(glm::cross(t, glm::vec3(0, 1, 0)));
 		glm::vec3 b = glm::normalize(glm::cross(n, t));
-		float w = 10.0f;
+		
 		glm::vec3 l = p - (w / 2) * n;
 		glm::vec3 r = p + (w / 2) * n;
 		m_leftOffsetPoints.push_back(l);
@@ -274,7 +274,7 @@ void CCatmullRom::CreateOffsetCurves()
 		glm::vec3 t = glm::normalize(pNext - p);
 		glm::vec3 n = glm::normalize(glm::cross(t, glm::vec3(0, 1, 0)));
 		glm::vec3 b = glm::normalize(glm::cross(n, t));
-		float w = 10.0f;
+		
 		glm::vec3 l = p - (w / 2) * n;
 		glm::vec3 r = p + (w / 2) * n;
 		m_rightOffsetPoints.push_back(r);
@@ -309,6 +309,43 @@ void CCatmullRom::CreateTrack()
 {
 	
 	// Generate a VAO called m_vaoTrack and a VBO to get the offset curve points and indices on the graphics card
+	glGenVertexArrays(1, &m_vaoTrack);
+	glBindVertexArray(m_vaoTrack);
+
+	m_vboT.Create();
+	m_vboT.Bind();
+
+	glm::vec2 texCords[4] = { glm::vec2(0,0), glm::vec2(1,0), glm::vec2(0,1), glm::vec2(1,1) };
+	glm::vec3 up = { 0,1,0 };
+
+	for (int i = 0; i <= m_rightOffsetPoints.size(); i++) {
+
+		m_vboT.AddData(&m_leftOffsetPoints.at(i% m_rightOffsetPoints.size()), sizeof(glm::vec3));
+		m_vboT.AddData(&texCords[i % 4], sizeof(glm::vec2));
+		m_vboT.AddData(&up, sizeof(glm::vec3));
+		m_vertexCount += 1;
+
+		m_vboT.AddData(&m_rightOffsetPoints.at(i % m_rightOffsetPoints.size()), sizeof(glm::vec3));
+		m_vboT.AddData(&texCords[i + 1 % 4], sizeof(glm::vec2));
+		m_vboT.AddData(&up, sizeof(glm::vec3));
+		m_vertexCount += 1;
+
+	}
+	m_vboT.UploadDataToGPU(GL_STATIC_DRAW);
+	// Set the vertex attribute locations
+	GLsizei stride = 2 * sizeof(glm::vec3) + sizeof(glm::vec2);
+	// Vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+	// Texture coordinates
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)sizeof(glm::vec3));
+	// Normal vectors
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)
+		+ sizeof(glm::vec2)));
+
+
 
 }
 
@@ -340,7 +377,12 @@ void CCatmullRom::RenderOffsetCurves()
 
 void CCatmullRom::RenderTrack()
 {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	// Bind the VAO m_vaoTrack and render it
+	glBindVertexArray(m_vaoTrack);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, m_vertexCount);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 }
 
 int CCatmullRom::CurrentLap(float d)

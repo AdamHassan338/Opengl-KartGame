@@ -55,4 +55,5 @@ private:
 	CVertexBufferObject m_vboCL;
 	CVertexBufferObject m_vboLL;
 	CVertexBufferObject m_vboRL;
+	CVertexBufferObject m_vboT;
 };

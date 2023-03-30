@@ -79,7 +79,14 @@ private:
 	float m_t;
 	glm::vec3 m_spaceShipPosition;
 	glm::mat4 m_spaceShipOrientation;
+	float m_cameraRotation;
 
 	float m_currentDistance;
+	float m_rotationSpeed = .001f;
+
+
+
+	bool rotateLeft = false;
+	bool rotateRight = false;
 
 };
