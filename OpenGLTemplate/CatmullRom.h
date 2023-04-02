@@ -17,7 +17,7 @@ public:
 	void CreateOffsetCurves();
 	void RenderOffsetCurves();
 
-	void CreateTrack();
+	void CreateTrack(string filename, int tiles);
 	void RenderTrack();
 
 	int CurrentLap(float d); // Return the currvent lap (starting from 0) based on distance along the control curve.
@@ -56,4 +56,5 @@ private:
 	CVertexBufferObject m_vboLL;
 	CVertexBufferObject m_vboRL;
 	CVertexBufferObject m_vboT;
+	
 };

@@ -6,7 +6,7 @@
 
 CCatmullRom::CCatmullRom()
 {
-	m_vertexCount = 0;
+
 }
 
 CCatmullRom::~CCatmullRom()
@@ -305,9 +305,14 @@ void CCatmullRom::CreateOffsetCurves()
 }
 
 
-void CCatmullRom::CreateTrack()
+void CCatmullRom::CreateTrack(string filename, int tiles)
 {
-	
+	m_texture.Load(filename);
+	m_texture.SetSamplerObjectParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	m_texture.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	m_texture.SetSamplerObjectParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	m_texture.SetSamplerObjectParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	// Generate a VAO called m_vaoTrack and a VBO to get the offset curve points and indices on the graphics card
 	glGenVertexArrays(1, &m_vaoTrack);
 	glBindVertexArray(m_vaoTrack);
@@ -318,15 +323,23 @@ void CCatmullRom::CreateTrack()
 	glm::vec2 texCords[4] = { glm::vec2(0,0), glm::vec2(1,0), glm::vec2(0,1), glm::vec2(1,1) };
 	glm::vec3 up = { 0,1,0 };
 
+	size_t totalPoints = m_rightOffsetPoints.size();
+
+
 	for (int i = 0; i <= m_rightOffsetPoints.size(); i++) {
 
+		float u = static_cast<float>(i) / static_cast<float>(totalPoints) * tiles;
+
+		glm::vec2 texCoordsLeft(u, 0);
+		glm::vec2 texCoordsRight(u, 1);
+
 		m_vboT.AddData(&m_leftOffsetPoints.at(i% m_rightOffsetPoints.size()), sizeof(glm::vec3));
-		m_vboT.AddData(&texCords[i % 4], sizeof(glm::vec2));
+		m_vboT.AddData(&texCoordsLeft, sizeof(glm::vec2));
 		m_vboT.AddData(&up, sizeof(glm::vec3));
 		m_vertexCount += 1;
 
 		m_vboT.AddData(&m_rightOffsetPoints.at(i % m_rightOffsetPoints.size()), sizeof(glm::vec3));
-		m_vboT.AddData(&texCords[i + 1 % 4], sizeof(glm::vec2));
+		m_vboT.AddData(&texCoordsRight, sizeof(glm::vec2));
 		m_vboT.AddData(&up, sizeof(glm::vec3));
 		m_vertexCount += 1;
 
@@ -377,11 +390,14 @@ void CCatmullRom::RenderOffsetCurves()
 
 void CCatmullRom::RenderTrack()
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	// Bind the VAO m_vaoTrack and render it
 	glBindVertexArray(m_vaoTrack);
+	m_texture.Bind();
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, m_vertexCount);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
 
 }
 

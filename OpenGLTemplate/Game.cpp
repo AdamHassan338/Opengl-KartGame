@@ -58,6 +58,7 @@ Game::Game()
 	m_pBarrelMesh = NULL;
 	m_pHorseMesh = NULL;
 	m_pFigherMesh = NULL;
+	m_pKartMesh = NULL;
 	m_pSphere = NULL;
 	m_pHighResolutionTimer = NULL;
 	m_pAudio = NULL;
@@ -83,6 +84,7 @@ Game::~Game()
 	delete m_pFtFont;
 	delete m_pBarrelMesh;
 	delete m_pHorseMesh;
+	delete m_pKartMesh;
 	delete m_pSphere;
 	delete m_pAudio;
 	delete m_pCatmullRom;
@@ -123,6 +125,7 @@ void Game::Initialise()
 	m_pBarrelMesh = new COpenAssetImportMesh;
 	m_pHorseMesh = new COpenAssetImportMesh;
 	m_pFigherMesh = new COpenAssetImportMesh;
+	m_pKartMesh = new COpenAssetImportMesh;
 	m_pSphere = new CSphere;
 	m_pAudio = new CAudio;
 	m_object = new MyObject;
@@ -132,7 +135,7 @@ void Game::Initialise()
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
 	m_pCatmullRom->CreateOffsetCurves();
-	m_pCatmullRom->CreateTrack();
+	m_pCatmullRom->CreateTrack("resources\\textures\\rainbow.png",50);
 
 	RECT dimensions = m_gameWindow.GetDimensions();
 
@@ -207,6 +210,8 @@ void Game::Initialise()
 	m_pBarrelMesh->Load("resources\\models\\Barrel\\Barrel02.obj");  // Downloaded from http://www.psionicgames.com/?page_id=24 on 24 Jan 2013
 	m_pHorseMesh->Load("resources\\models\\Horse\\Horse2.obj");  // Downloaded from http://opengameart.org/content/horse-lowpoly on 24 Jan 2013
 	m_pFigherMesh->Load("resources\\models\\Fighter\\fighter1.obj");
+	m_pKartMesh->Load("resources\\models\\kart\\kart2.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023
+	
 	// Create a sphere
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
 	
@@ -390,16 +395,29 @@ void Game::Render()
 		//m_pSphere->Render();
 	modelViewMatrixStack.Pop();
 
+
+	// Render the Kart
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(m_kartPos);
+	modelViewMatrixStack *= m_kartRoation;
+	modelViewMatrixStack.Scale(5.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+	pMainProgram->SetUniform("bUseTexture", true);
+	m_pKartMesh->Render();
+	modelViewMatrixStack.Pop();
+
 	// RENDER THE SPLINE
 	modelViewMatrixStack.Push();
-	pMainProgram->SetUniform("bUseTexture", false); // turn off texturing
+	pMainProgram->SetUniform("bUseTexture", true); // turn off texturing
 	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 	pMainProgram->SetUniform("matrices.normalMatrix",
 		m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	// Render your object here
 		//m_pCatmullRom->RenderPath();
-	m_pCatmullRom->RenderCentreline();
-	m_pCatmullRom->RenderOffsetCurves();
+	//m_pCatmullRom->RenderCentreline();
+	//m_pCatmullRom->RenderOffsetCurves();
 	m_pCatmullRom->RenderTrack();
 	modelViewMatrixStack.Pop();
 
@@ -478,7 +496,9 @@ void Game::Update()
 
 	glm::vec3 up = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, t);
 
-	m_pCamera->Set(p, 10.0f* t + p , up);
+	m_kartPos = glm::vec3(p.x,p.y-1,p.z);
+	m_kartRoation = glm::mat4(glm::mat3(t, b, n));
+	//m_pCamera->Set(p, 10.0f* t + p , up);
 
 	m_t += 0.001f * (float)m_dt;
 

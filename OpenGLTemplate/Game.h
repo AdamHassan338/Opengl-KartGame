@@ -37,6 +37,7 @@ private:
 	COpenAssetImportMesh *m_pBarrelMesh;
 	COpenAssetImportMesh *m_pHorseMesh;
 	COpenAssetImportMesh* m_pFigherMesh;
+	COpenAssetImportMesh* m_pKartMesh;
 	CSphere *m_pSphere;
 	CHighResolutionTimer *m_pHighResolutionTimer;
 	CAudio *m_pAudio;
@@ -88,5 +89,12 @@ private:
 
 	bool rotateLeft = false;
 	bool rotateRight = false;
+
+
+	//kart stuff
+	glm::vec3 m_kartPos = glm::vec3(0);
+	glm::mat4 m_kartRoation = glm::mat4(1);
+
+	//camera stuff
 
 };
