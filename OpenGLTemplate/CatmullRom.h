@@ -14,7 +14,7 @@ public:
 	void CreateCentreline();
 	void RenderCentreline();
 
-	void CreateOffsetCurves();
+	void CreateOffsetCurves(float width);
 	void RenderOffsetCurves();
 
 	void CreateTrack(string filename, int tiles);

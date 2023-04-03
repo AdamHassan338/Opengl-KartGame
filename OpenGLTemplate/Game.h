@@ -96,5 +96,8 @@ private:
 	glm::mat4 m_kartRoation = glm::mat4(1);
 
 	//camera stuff
-
+	enum camreaModes {  Freecam, 
+						FirstPerson,
+						ThirdPerson};
+	int m_cameraMode;
 };

@@ -110,6 +110,7 @@ void Game::Initialise()
 	m_spaceShipPosition = glm::vec3(0);
 	m_spaceShipOrientation = glm::mat4(1);
 	m_cameraRotation = 0;
+	m_cameraMode = Game::Freecam;
 
 	m_currentDistance = 0.0f;
 	// Set the clear colour and depth
@@ -134,7 +135,7 @@ void Game::Initialise()
 	
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
-	m_pCatmullRom->CreateOffsetCurves();
+	m_pCatmullRom->CreateOffsetCurves(40.0f);
 	m_pCatmullRom->CreateTrack("resources\\textures\\rainbow.png",50);
 
 	RECT dimensions = m_gameWindow.GetDimensions();
@@ -210,7 +211,7 @@ void Game::Initialise()
 	m_pBarrelMesh->Load("resources\\models\\Barrel\\Barrel02.obj");  // Downloaded from http://www.psionicgames.com/?page_id=24 on 24 Jan 2013
 	m_pHorseMesh->Load("resources\\models\\Horse\\Horse2.obj");  // Downloaded from http://opengameart.org/content/horse-lowpoly on 24 Jan 2013
 	m_pFigherMesh->Load("resources\\models\\Fighter\\fighter1.obj");
-	m_pKartMesh->Load("resources\\models\\kart\\kart2.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023
+	m_pKartMesh->Load("resources\\models\\kart\\kart3.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023
 	
 	// Create a sphere
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
@@ -400,7 +401,7 @@ void Game::Render()
 	modelViewMatrixStack.Push();
 	modelViewMatrixStack.Translate(m_kartPos);
 	modelViewMatrixStack *= m_kartRoation;
-	modelViewMatrixStack.Scale(5.0f);
+	modelViewMatrixStack.Scale(1.0f);
 	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
@@ -464,24 +465,48 @@ void Game::Render()
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
-	//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
-	m_pCamera->Update(m_dt);
-
+	// TNB Frame
 	m_currentDistance += m_dt * 0.1f;
 	glm::vec3 p;
 	glm::vec3 pNext;
 	m_pCatmullRom->Sample(m_currentDistance, p);
 	m_pCatmullRom->Sample(m_currentDistance + 1.0f, pNext);
-	glm::vec3 t = glm::normalize(pNext - p);
+	glm::vec3 T = glm::normalize(pNext - p);
 
-	glm::vec3 n = glm::normalize(glm::cross(t,glm::vec3(0,1,0)));
-	glm::vec3 b = glm::normalize(glm::cross(n,t));
+	glm::vec3 N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
+	glm::vec3 B = glm::normalize(glm::cross(N, T));
 
 	float w = 10.0f;
 
 
-	glm::vec3 l = p - (w / 2) * n;
-	glm::vec3 r = p + (w / 2) * n;
+	glm::vec3 l = p - (w / 2) * N;
+	glm::vec3 r = p + (w / 2) * N;
+
+	// Cart update
+	//glm::vec3 up = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, T);
+
+	m_kartPos = glm::vec3(p.x, p.y - 1, p.z);
+	m_kartRoation = glm::mat4(glm::mat3(T, B, N));
+
+	if (m_cameraMode == Game::Freecam) {
+		m_pCamera->Update(m_dt);
+	}
+	if (m_cameraMode == Game::FirstPerson) {
+		glm::vec3 newPos = p + (10.0f * B) - (5.0f * T);
+		m_pCamera->Set(newPos, p + (20.0f * T) + (4.0f * B), B);
+
+		newPos = p + (7.0f * B) - (4.0f * T);
+		m_pCamera->Set(newPos, p + (20.0f * T) + (10.0f * B), B);
+	}
+
+	if (m_cameraMode == Game::ThirdPerson) {
+		glm::vec3 newPos = p + (20.0f * B) - (30.0f * T);
+		m_pCamera->Set(newPos, p + (20.0f * T), B);
+	}
+	//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
+	
+
+	
 
 	p.y += 5.0f;
 
@@ -494,27 +519,24 @@ void Game::Update()
 	}
 	
 
-	glm::vec3 up = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, t);
-
-	m_kartPos = glm::vec3(p.x,p.y-1,p.z);
-	m_kartRoation = glm::mat4(glm::mat3(t, b, n));
+	
 	//m_pCamera->Set(p, 10.0f* t + p , up);
-
+	/*
 	m_t += 0.001f * (float)m_dt;
-
+	
 	float radius = 75.0f;
 	glm::vec3 x = glm::vec3(1, 0, 0);
 	glm::vec3 y = glm::vec3(0, 1, 0);
 	glm::vec3 z = glm::vec3(0, 0, 1);
 	m_spaceShipPosition = radius * cos(m_t) * x + 50.0f * y + radius * sin(m_t) * z;
 
-
-	glm::vec3 T = glm::normalize(-radius * sin(m_t) * x + radius * cos(m_t) * z);
-	glm::vec3 N = glm::normalize(glm::cross(T, y));
-	glm::vec3 B = glm::normalize(glm::cross(N, T));
+	
+	//glm::vec3 T = glm::normalize(-radius * sin(m_t) * x + radius * cos(m_t) * z);
+	//glm::vec3 N = glm::normalize(glm::cross(T, y));
+	//glm::vec3 B = glm::normalize(glm::cross(N, T));
 
 	m_spaceShipOrientation = glm::mat4(glm::mat3(T, B, N));
-
+	*/
 	/*
 	int distance = 30;
 	static double theta = 0;
@@ -682,7 +704,7 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 		case VK_ESCAPE:
 			PostQuitMessage(0);
 			break;
-		case '1':
+		case '8':
 			m_pAudio->PlayEventSound();
 			break;
 		case VK_F1:
@@ -693,6 +715,16 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 			break;
 		case VK_RIGHT:
 			rotateRight = true;
+			break;
+
+		case '1':
+			m_cameraMode = Game::Freecam;
+			break;
+		case '2':
+			m_cameraMode = Game::FirstPerson;
+			break;
+		case '3':
+			m_cameraMode = Game::ThirdPerson;
 			break;
 		}
 		
