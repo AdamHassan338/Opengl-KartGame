@@ -266,14 +266,23 @@ void Game::Render()
 	
 	// Set light and materials in main shader program
 	glm::vec4 lightPosition1 = glm::vec4(-100, 100, -100, 1); // Position of light source *in world coordinates*
-	pMainProgram->SetUniform("light1.position", viewMatrix*lightPosition1); // Position of light source *in eye coordinates*
-	pMainProgram->SetUniform("light1.La", glm::vec3(1.0f));		// Ambient colour of light
-	pMainProgram->SetUniform("light1.Ld", glm::vec3(1.0f));		// Diffuse colour of light
+	pMainProgram->SetUniform("light1.position", viewMatrix * lightPosition1); // Position of light source *in eye coordinates*
+	pMainProgram->SetUniform("light1.La", glm::vec3(0.5));		// Ambient colour of light
+	pMainProgram->SetUniform("light1.Ld", glm::vec3(.8f));		// Diffuse colour of light
 	pMainProgram->SetUniform("light1.Ls", glm::vec3(1.0f));		// Specular colour of light
 	pMainProgram->SetUniform("material1.Ma", glm::vec3(1.0f));	// Ambient material reflectance
 	pMainProgram->SetUniform("material1.Md", glm::vec3(0.0f));	// Diffuse material reflectance
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(0.0f));	// Specular material reflectance
 	pMainProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
+
+
+	// Set light and materials in main shader program
+	m_spotLightpos; // Position of light source *in world coordinates*
+	pMainProgram->SetUniform("light2.position", viewMatrix * m_spotLightpos); // Position of light source *in eye coordinates*
+	pMainProgram->SetUniform("light2.La", glm::vec3(0,0,0));		// Ambient colour of light
+	pMainProgram->SetUniform("light2.Ld", glm::vec3(1.0f));		// Diffuse colour of light
+	pMainProgram->SetUniform("light2.Ls", glm::vec3(1.0f));		// Specular colour of light
+
 		
 
 	// Render the skybox and terrain with full ambient reflectance 
@@ -465,18 +474,20 @@ void Game::Render()
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
+
 	// TNB Frame
-	m_currentDistance += m_dt * 0.1f;
+	m_currentDistance += m_dt * m_speed;
 	glm::vec3 p;
 	glm::vec3 pNext;
 	m_pCatmullRom->Sample(m_currentDistance, p);
 	m_pCatmullRom->Sample(m_currentDistance + 1.0f, pNext);
+
 	glm::vec3 T = glm::normalize(pNext - p);
 
 	glm::vec3 N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
 	glm::vec3 B = glm::normalize(glm::cross(N, T));
 
-	float w = 10.0f;
+	float w = 40.0f;
 
 
 	glm::vec3 l = p - (w / 2) * N;
@@ -487,21 +498,46 @@ void Game::Update()
 
 	m_kartPos = glm::vec3(p.x, p.y - 1, p.z);
 	m_kartRoation = glm::mat4(glm::mat3(T, B, N));
+	//glm::vec3 oldPos = m_kartPos;
+
+	if(m_cameraMode != Game::Freecam){
+		if (m_moveRight) {
+			m_kartOffset += m_dt * m_turnSpeed;
+			if (m_kartOffset > 15.0f) {
+				m_kartOffset = 15.0f;
+			}
+		}
+
+		if (m_moveLeft) {
+			m_kartOffset -= m_dt * m_turnSpeed;
+			if (m_kartOffset < -15.0f) {
+				m_kartOffset = -15.0f;
+			}
+		}
+	}
+
+	m_kartPos += N * m_kartOffset;
+	//update light pos
+	
+	m_spotLightpos = glm::vec4(m_kartPos + (4.0f * T) + (6.0f * B),1);
+
+	//set camera
 
 	if (m_cameraMode == Game::Freecam) {
 		m_pCamera->Update(m_dt);
 	}
 	if (m_cameraMode == Game::FirstPerson) {
-		glm::vec3 newPos = p + (10.0f * B) - (5.0f * T);
-		m_pCamera->Set(newPos, p + (20.0f * T) + (4.0f * B), B);
+		
+		//glm::vec3 newPos =  p + (10.0f * B) - (5.0f * T);
+		//m_pCamera->Set(newPos,  p + (20.0f * T) + (4.0f * B), B);
 
-		newPos = p + (7.0f * B) - (4.0f * T);
-		m_pCamera->Set(newPos, p + (20.0f * T) + (10.0f * B), B);
+		glm::vec3 newPos = m_kartPos + (7.0f * B) - (4.0f * T);
+		m_pCamera->Set(newPos, m_kartPos + (20.0f * T) + (10.0f * B), B);
 	}
 
 	if (m_cameraMode == Game::ThirdPerson) {
-		glm::vec3 newPos = p + (20.0f * B) - (30.0f * T);
-		m_pCamera->Set(newPos, p + (20.0f * T), B);
+		glm::vec3 newPos = m_kartPos + (20.0f * B) - (30.0f * T);
+		m_pCamera->Set(newPos, m_kartPos + (20.0f * T), B);
 	}
 	//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
 	
@@ -717,6 +753,13 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 			rotateRight = true;
 			break;
 
+		case 'A':
+			m_moveLeft = true;
+			break;
+		case 'D':
+			m_moveRight = true;
+			break;
+
 		case '1':
 			m_cameraMode = Game::Freecam;
 			break;
@@ -737,6 +780,13 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 			break;
 		case VK_RIGHT:
 			rotateRight = false;
+			break;
+
+		case 'A':
+			m_moveLeft = false;
+			break;
+		case 'D':
+			m_moveRight = false;
 			break;
 		
 		}
@@ -782,3 +832,4 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE, PSTR, int)
 	printf("Debugging Window:\n");
 	return int(game.Execute());
 }
+

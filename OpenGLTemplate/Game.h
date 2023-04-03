@@ -86,12 +86,16 @@ private:
 	float m_rotationSpeed = .001f;
 
 
-
+	// Controles 
 	bool rotateLeft = false;
 	bool rotateRight = false;
-
+	bool m_moveLeft = false;
+	bool m_moveRight = false;
 
 	//kart stuff
+	float m_speed = 0.1f;
+	float m_turnSpeed = 0.05f;
+	float m_kartOffset = 0.0f;
 	glm::vec3 m_kartPos = glm::vec3(0);
 	glm::mat4 m_kartRoation = glm::mat4(1);
 
@@ -100,4 +104,7 @@ private:
 						FirstPerson,
 						ThirdPerson};
 	int m_cameraMode;
+
+	//Lights
+	glm::vec4 m_spotLightpos;
 };

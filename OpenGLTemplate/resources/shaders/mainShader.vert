@@ -28,6 +28,7 @@ struct MaterialInfo
 
 // Lights and materials passed in as uniform variables from client programme
 uniform LightInfo light1; 
+uniform LightInfo light2; 
 uniform MaterialInfo material1; 
 
 // Layout of vertex attributes in VBO
@@ -44,19 +45,19 @@ out vec3 worldPosition;	// used for skybox
 // This function implements the Phong shading model
 // The code is based on the OpenGL 4.0 Shading Language Cookbook, Chapter 2, pp. 62 - 63, with a few tweaks. 
 // Please see Chapter 2 of the book for a detailed discussion.
-vec3 PhongModel(vec4 eyePosition, vec3 eyeNorm)
+vec3 PhongModel(vec4 eyePosition, vec3 eyeNorm , LightInfo light)
 {
-	vec3 s = normalize(vec3(light1.position - eyePosition));
+	vec3 s = normalize(vec3(light.position - eyePosition));
 	vec3 v = normalize(-eyePosition.xyz);
 	vec3 r = reflect(-s, eyeNorm);
 	vec3 n = eyeNorm;
-	vec3 ambient = light1.La * material1.Ma;
+	vec3 ambient = light.La * material1.Ma;
 	float sDotN = max(dot(s, n), 0.0f);
-	vec3 diffuse = light1.Ld * material1.Md * sDotN;
+	vec3 diffuse = light.Ld * material1.Md * sDotN;
 	vec3 specular = vec3(0.0f);
 	float eps = 0.000001f; // add eps to shininess below -- pow not defined if second argument is 0 (as described in GLSL documentation)
 	if (sDotN > 0.0f) 
-		specular = light1.Ls * material1.Ms * pow(max(dot(r, v), 0.0f), material1.shininess + eps);
+		specular = light.Ls * material1.Ms * pow(max(dot(r, v), 0.0f), material1.shininess + eps);
 	
 
 	return ambient + diffuse + specular;
@@ -78,7 +79,7 @@ void main()
 	vec4 vEyePosition = matrices.modelViewMatrix * vec4(inPosition, 1.0f);
 		
 	// Apply the Phong model to compute the vertex colour
-	vColour = PhongModel(vEyePosition, vEyeNorm);
+	vColour = PhongModel(vEyePosition, vEyeNorm,light1)+ PhongModel(vEyePosition, vEyeNorm,light2);
 	
 	// Pass through the texture coordinate
 	vTexCoord = inCoord;
