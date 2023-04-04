@@ -3,7 +3,8 @@
 #include "Common.h"
 #include "GameWindow.h"
 #include "CatmullRom.h"
-
+#include "Obstacle.h"
+#include <vector>
 // Classes used in game.  For a new class, declare it here and provide a pointer to an object of this class below.  Then, in Game.cpp, 
 // include the header.  In the Game constructor, set the pointer to NULL and in Game::Initialise, create a new object.  Don't forget to 
 // delete the object in the destructor.   
@@ -20,6 +21,7 @@ class CAudio;
 class CCatmullRom;
 class MyObject;
 class CCube;
+class Obstacle;
 
 class Game {
 private:
@@ -44,7 +46,8 @@ private:
 	CCatmullRom* m_pCatmullRom;
 	MyObject* m_object;
 	CCube* m_pCube;
-
+	//Obstacle* m_obstacle;
+	vector<Obstacle*> m_obstacles;
 	// Some other member variables
 	double m_dt;
 	double m_time = 0;

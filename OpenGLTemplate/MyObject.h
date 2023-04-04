@@ -9,7 +9,7 @@ class MyObject
 public:
 	MyObject();
 	~MyObject();
-	void Create(string directory, string front, int slicesIn, int stacksIn);
+	void Create(string directory, string front);
 	
 	void combine();
 	void Render();

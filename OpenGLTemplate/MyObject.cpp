@@ -15,7 +15,7 @@ MyObject::~MyObject()
 {}
 
 // Create a unit sphere 
-void MyObject::Create(string a_sDirectory, string a_sFilename, int slicesIn, int stacksIn)
+void MyObject::Create(string a_sDirectory, string a_sFilename)
 {
 	// check if filename passed in -- if so, load texture
 

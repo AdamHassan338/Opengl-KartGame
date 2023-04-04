@@ -65,7 +65,7 @@ Game::Game()
 	m_pCatmullRom = NULL;
 	m_object = NULL;
 	m_pCube = NULL;
-
+	//m_obstacle = NULL;
 	m_dt = 0.0;
 	m_framesPerSecond = 0;
 	m_frameCount = 0;
@@ -91,6 +91,7 @@ Game::~Game()
 	delete m_object;
 	delete m_pFigherMesh;
 	delete m_pCube;
+	//delete m_obstacles;
 
 	if (m_pShaderPrograms != NULL) {
 		for (unsigned int i = 0; i < m_pShaderPrograms->size(); i++)
@@ -132,11 +133,18 @@ void Game::Initialise()
 	m_object = new MyObject;
 	m_pCatmullRom = new CCatmullRom;
 	m_pCube = new CCube;
-	
+	//m_obstacle = new Obstacle;
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
 	m_pCatmullRom->CreateOffsetCurves(40.0f);
 	m_pCatmullRom->CreateTrack("resources\\textures\\rainbow.png",50);
+	
+	for (int i = 0; i < m_pCatmullRom->getLength() - 300; i += 300) {
+		m_obstacles.push_back(new Obstacle);
+		m_obstacles.at(m_obstacles.size() - 1)->Create("resources\\textures\\", "stonebrick.jpg");
+		m_obstacles.at(m_obstacles.size() - 1)->set(i+ 300, m_pCatmullRom);
+	}
+
 
 	RECT dimensions = m_gameWindow.GetDimensions();
 
@@ -217,7 +225,7 @@ void Game::Initialise()
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
 	
 	// Create a my object
-	m_object->Create("resources\\textures\\", "stonebrick.jpg", 25, 25);
+	m_object->Create("resources\\textures\\", "stonebrick.jpg");
 
 	m_pCube->Create("resources\\textures\\800px-Smiley.svg.png");
 
@@ -456,6 +464,20 @@ void Game::Render()
 	m_object->Render();
 	modelViewMatrixStack.Pop();
 
+	// Render the my Obstacle
+	for (Obstacle* o : m_obstacles) {
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(o->m_pos);
+		modelViewMatrixStack *= o->m_rotation;
+		modelViewMatrixStack.Scale(5.0f);
+		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		o->Render();
+		modelViewMatrixStack.Pop();
+	}
+	
 
 
 
@@ -471,10 +493,18 @@ void Game::Render()
 
 }
 
+void collide(vector< Obstacle*> obstacles, glm::vec3 pos) {
+	for (Obstacle* o : obstacles) {
+		if (glm::distance(pos, o->m_pos) < 3.0f) {
+			printf("hit\n");
+		}
+	}
+}
+
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
-
+	collide(m_obstacles, m_kartPos);
 	// TNB Frame
 	m_currentDistance += m_dt * m_speed;
 	glm::vec3 p;

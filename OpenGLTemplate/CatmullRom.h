@@ -20,6 +20,8 @@ public:
 	void CreateTrack(string filename, int tiles);
 	void RenderTrack();
 
+	float getLength() {	return fTotalLength;}
+
 	int CurrentLap(float d); // Return the currvent lap (starting from 0) based on distance along the control curve.
 
 	bool Sample(float d, glm::vec3 &p, glm::vec3 &up = _dummy_vector); // Return a point on the centreline based on a certain distance along the control curve.
@@ -30,7 +32,7 @@ private:
 	void ComputeLengthsAlongControlPoints();
 	void UniformlySampleControlPoints(int numSamples);
 	glm::vec3 Interpolate(glm::vec3 &p0, glm::vec3 &p1, glm::vec3 &p2, glm::vec3 &p3, float t);
-
+	float fTotalLength;
 
 	vector<float> m_distances;
 	CTexture m_texture;

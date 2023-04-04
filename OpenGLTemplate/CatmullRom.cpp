@@ -31,7 +31,7 @@ glm::vec3 CCatmullRom::Interpolate(glm::vec3 &p0, glm::vec3 &p1, glm::vec3 &p2, 
 void CCatmullRom::SetControlPoints()
 {
 	// Set control points (m_controlPoints) here, or load from disk
-
+	/*
 	m_controlPoints.push_back(glm::vec3(100, 10, 0));
 	m_controlPoints.push_back(glm::vec3(71, 15, 71));
 	m_controlPoints.push_back(glm::vec3(0, 25, 100));
@@ -40,6 +40,26 @@ void CCatmullRom::SetControlPoints()
 	m_controlPoints.push_back(glm::vec3(-71, 25, -71));
 	m_controlPoints.push_back(glm::vec3(0, 15, -100));
 	m_controlPoints.push_back(glm::vec3(71, 10, -71));
+	*/
+
+	m_controlPoints.push_back(glm::vec3(0, 5, 0));
+	m_controlPoints.push_back(glm::vec3(120, 5, 0));
+	m_controlPoints.push_back(glm::vec3(270, 5, 125));
+	m_controlPoints.push_back(glm::vec3(375, 5, 260));
+	m_controlPoints.push_back(glm::vec3(755, 5, 260));
+	m_controlPoints.push_back(glm::vec3(870, 5, 460));
+	m_controlPoints.push_back(glm::vec3(870, 5, 615));
+	m_controlPoints.push_back(glm::vec3(730, 5, 740));
+	m_controlPoints.push_back(glm::vec3(310, 5, 740));
+	m_controlPoints.push_back(glm::vec3(-76, 5, 740));
+	m_controlPoints.push_back(glm::vec3(-345, 5, 590));
+	m_controlPoints.push_back(glm::vec3(-345, 5, 400));
+	//m_controlPoints.push_back(glm::vec3(-345, 50, 340));
+	m_controlPoints.push_back(glm::vec3(-270, 5,240));
+	m_controlPoints.push_back(glm::vec3(-180, 5,65));
+	m_controlPoints.push_back(glm::vec3(-120, 5, 0));
+
+
 
 	// Optionally, set upvectors (m_controlUpVectors, one for each control point as well)
 }
@@ -90,7 +110,7 @@ bool CCatmullRom::Sample(float d, glm::vec3 &p, glm::vec3 &up)
 
 	if (j == -1)
 		return false;
-
+	
 	// Interpolate on current segment -- get t
 	float fSegmentLength = m_distances[j + 1] - m_distances[j];
 	float t = (fLength - m_distances[j]) / fSegmentLength;
@@ -118,7 +138,7 @@ void CCatmullRom::UniformlySampleControlPoints(int numSamples)
 
 	// Compute the lengths of each segment along the control polygon, and the total length
 	ComputeLengthsAlongControlPoints();
-	float fTotalLength = m_distances[m_distances.size() - 1];
+	fTotalLength = m_distances[m_distances.size() - 1];
 
 	// The spacing will be based on the control polygon
 	float fSpacing = fTotalLength / numSamples;
