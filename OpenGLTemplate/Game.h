@@ -4,6 +4,7 @@
 #include "GameWindow.h"
 #include "CatmullRom.h"
 #include "Obstacle.h"
+#include "Quad.h"
 #include <vector>
 // Classes used in game.  For a new class, declare it here and provide a pointer to an object of this class below.  Then, in Game.cpp, 
 // include the header.  In the Game constructor, set the pointer to NULL and in Game::Initialise, create a new object.  Don't forget to 
@@ -22,6 +23,7 @@ class CCatmullRom;
 class MyObject;
 class CCube;
 class Obstacle;
+class Quad;
 
 class Game {
 private:
@@ -29,6 +31,7 @@ private:
 	void Initialise();
 	void Update();
 	void Render();
+	void collide();
 
 	// Pointers to game objects.  They will get allocated in Game::Initialise()
 	CSkybox *m_pSkybox;
@@ -46,6 +49,7 @@ private:
 	CCatmullRom* m_pCatmullRom;
 	MyObject* m_object;
 	CCube* m_pCube;
+	Quad* m_quad;
 	//Obstacle* m_obstacle;
 	vector<Obstacle*> m_obstacles;
 	// Some other member variables
@@ -74,6 +78,7 @@ public:
 private:
 	static const int FPS = 60;
 	void DisplayFrameRate();
+	void DrawHud();
 	void GameLoop();
 	GameWindow m_gameWindow;
 	HINSTANCE m_hInstance;
@@ -101,6 +106,7 @@ private:
 	float m_kartOffset = 0.0f;
 	glm::vec3 m_kartPos = glm::vec3(0);
 	glm::mat4 m_kartRoation = glm::mat4(1);
+	int m_lives = 3;
 
 	//camera stuff
 	enum camreaModes {  Freecam, 

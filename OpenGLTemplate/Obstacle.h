@@ -9,7 +9,7 @@ class Obstacle : public MyObject
     
 public:
     Obstacle();
-
+    ~Obstacle();
     //void initalize(string a_sDirectory, string a_sFilename);
 
     void set(float distance, CCatmullRom* path);

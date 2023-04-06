@@ -46,6 +46,8 @@ Source code drawn from a number of sources and examples, including contributions
 #include "MyObject.h"
 #include "Cube.h"
 
+#include "include/glm/gtx/string_cast.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
 
 // Constructor
 Game::Game()
@@ -65,6 +67,7 @@ Game::Game()
 	m_pCatmullRom = NULL;
 	m_object = NULL;
 	m_pCube = NULL;
+	m_quad = NULL;
 	//m_obstacle = NULL;
 	m_dt = 0.0;
 	m_framesPerSecond = 0;
@@ -91,6 +94,7 @@ Game::~Game()
 	delete m_object;
 	delete m_pFigherMesh;
 	delete m_pCube;
+	delete m_quad;
 	//delete m_obstacles;
 
 	if (m_pShaderPrograms != NULL) {
@@ -133,6 +137,7 @@ void Game::Initialise()
 	m_object = new MyObject;
 	m_pCatmullRom = new CCatmullRom;
 	m_pCube = new CCube;
+	m_quad = new Quad;
 	//m_obstacle = new Obstacle;
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
@@ -164,6 +169,9 @@ void Game::Initialise()
 	sShaderFileNames.push_back("textShader.frag");
 	sShaderFileNames.push_back("myShader.frag");
 	sShaderFileNames.push_back("myShader.vert");
+	sShaderFileNames.push_back("hudShader.vert");
+	sShaderFileNames.push_back("hudShader.frag");
+
 
 	for (int i = 0; i < (int) sShaderFileNames.size(); i++) {
 		string sExt = sShaderFileNames[i].substr((int) sShaderFileNames[i].size()-4, 4);
@@ -195,13 +203,23 @@ void Game::Initialise()
 	m_pShaderPrograms->push_back(pFontProgram);
 
 
-	// Create a shader program for fonts
+	// Create a shader program for my object
 	CShaderProgram* pMyProgram = new CShaderProgram;
 	pMyProgram->CreateProgram();
 	pMyProgram->AddShaderToProgram(&shShaders[4]);
 	pMyProgram->AddShaderToProgram(&shShaders[5]);
 	pMyProgram->LinkProgram();
 	m_pShaderPrograms->push_back(pMyProgram);
+
+
+
+	// Create a shader program for my object
+	CShaderProgram* pHudProgam = new CShaderProgram;
+	pHudProgam->CreateProgram();
+	pHudProgam->AddShaderToProgram(&shShaders[6]);
+	pHudProgam->AddShaderToProgram(&shShaders[7]);
+	pHudProgam->LinkProgram();
+	m_pShaderPrograms->push_back(pHudProgam);
 
 	// You can follow this pattern to load additional shaders
 
@@ -229,6 +247,8 @@ void Game::Initialise()
 
 	m_pCube->Create("resources\\textures\\800px-Smiley.svg.png");
 
+	//create hud quad
+	m_quad->Create("resources\\textures\\heart.png");
 	
 	glEnable(GL_CULL_FACE);
 
@@ -488,15 +508,26 @@ void Game::Render()
 	// Draw the 2D graphics after the 3D graphics
 	DisplayFrameRate();
 
+	//draw hud
+	DrawHud();
+
 	// Swap buffers to show the rendered image
 	SwapBuffers(m_gameWindow.Hdc());		
 
 }
 
-void collide(vector< Obstacle*> obstacles, glm::vec3 pos) {
-	for (Obstacle* o : obstacles) {
-		if (glm::distance(pos, o->m_pos) < 3.0f) {
+void Game::collide() {
+	for (std::vector<Obstacle*>::iterator it = m_obstacles.begin(); it != m_obstacles.end();) {
+		
+		if (glm::distance(m_kartPos, (*it)->m_pos) < 10.0f) {
+			(*it)->~Obstacle();
+			m_lives--;	
+			it = m_obstacles.erase(it);
 			printf("hit\n");
+			
+		}
+		else {
+			it++;
 		}
 	}
 }
@@ -504,7 +535,7 @@ void collide(vector< Obstacle*> obstacles, glm::vec3 pos) {
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
-	collide(m_obstacles, m_kartPos);
+	collide();
 	// TNB Frame
 	m_currentDistance += m_dt * m_speed;
 	glm::vec3 p;
@@ -670,6 +701,55 @@ void Game::DisplayFrameRate()
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		m_pFtFont->Render(20, height - 20, 20, "FPS: %d", m_framesPerSecond);
 	}
+}
+
+void Game::DrawHud()
+{
+
+	CShaderProgram* pHudProgam = (*m_pShaderPrograms)[3];
+	CShaderProgram* fontProgram = (*m_pShaderPrograms)[1];
+
+	RECT dimensions = m_gameWindow.GetDimensions();
+	int height = dimensions.bottom - dimensions.top;
+	int width = dimensions.right - dimensions.left;
+	m_gameWindow.SCREEN_HEIGHT;
+
+	glm::mat4 model = glm::mat4(1);
+	glm::mat4 view = glm::mat4(1);
+	
+	
+
+
+
+
+
+
+		// Use the font shader program
+		pHudProgam->UseProgram();
+		pHudProgam->SetUniform("sampler0", 0);
+
+		glDisable(GL_DEPTH_TEST);
+
+
+		glutil::MatrixStack modelMatrix;
+
+		for (int i = 0; i < m_lives; i++) {
+			modelMatrix.SetIdentity();
+			modelMatrix.Scale(0.1f);
+			modelMatrix.Translate(glm::vec3(8-i*2, -8, 0));
+			pHudProgam->SetUniform("model", modelMatrix.Top());
+			m_quad->Render();
+		}
+
+		fontProgram->UseProgram();
+		fontProgram->SetUniform("matrices.modelViewMatrix", glm::mat4(1));
+		fontProgram->SetUniform("matrices.projMatrix", m_pCamera->GetOrthographicProjectionMatrix());
+		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		m_pFtFont->Render(700, height - 550, 20, "Lives");
+
+
+
+
 }
 
 // The game loop runs repeatedly until game over

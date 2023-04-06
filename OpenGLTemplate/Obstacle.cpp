@@ -5,6 +5,10 @@ Obstacle::Obstacle()
 	
 }
 
+Obstacle::~Obstacle()
+{
+}
+
 
 
 
