@@ -43,6 +43,7 @@ private:
 	COpenAssetImportMesh *m_pHorseMesh;
 	COpenAssetImportMesh* m_pFigherMesh;
 	COpenAssetImportMesh* m_pKartMesh;
+	COpenAssetImportMesh* m_stoneMesh;
 	CSphere *m_pSphere;
 	CHighResolutionTimer *m_pHighResolutionTimer;
 	CAudio *m_pAudio;
@@ -107,6 +108,9 @@ private:
 	glm::vec3 m_kartPos = glm::vec3(0);
 	glm::mat4 m_kartRoation = glm::mat4(1);
 	int m_lives = 3;
+
+	//rocks
+	std::vector<glm::vec3> m_rockPositions;
 
 	//camera stuff
 	enum camreaModes {  Freecam, 
