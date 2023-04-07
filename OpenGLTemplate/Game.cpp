@@ -120,6 +120,18 @@ void Game::Initialise()
 	m_cameraMode = Game::Freecam;
 
 	m_currentDistance = 0.0f;
+
+	m_rockPositions.push_back(glm::vec3(200, 28, 180));
+	m_rockPositions.push_back(glm::vec3(500, 30, 310));
+	m_rockPositions.push_back(glm::vec3(280, 28, 100));
+	m_rockPositions.push_back(glm::vec3(710, 37, 413));
+	m_rockPositions.push_back(glm::vec3(670, 19, 600));
+	m_rockPositions.push_back(glm::vec3(400, 50, 150));
+	m_rockPositions.push_back(glm::vec3(500, 11, 800));
+
+
+
+
 	// Set the clear colour and depth
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(1.0f);
@@ -464,18 +476,19 @@ void Game::Render()
 	modelViewMatrixStack.Pop();
 
 
-
+	
 	// Render the asteroids
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(50,10,0));
-	modelViewMatrixStack.Scale(10.0f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-	pMainProgram->SetUniform("bUseTexture", true);
-	m_stoneMesh->Render();
-	modelViewMatrixStack.Pop();
-
+	for(int i= 0; i< m_rockPositions.size(); i++){
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(m_rockPositions[i]);
+		modelViewMatrixStack.Scale(5.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		pMainProgram->SetUniform("bUseTexture", true);
+		m_stoneMesh->Render();
+		modelViewMatrixStack.Pop();
+	}
 
 	// Use the my shader program 
 	pMainProgram = (*m_pShaderPrograms)[2];
@@ -552,6 +565,8 @@ void Game::collide() {
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
+	std::cout << glm::to_string(m_pCamera->GetPosition()) << "\n";
+
 	collide();
 	// TNB Frame
 	m_currentDistance += m_dt * m_speed;

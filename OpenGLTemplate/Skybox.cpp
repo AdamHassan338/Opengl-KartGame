@@ -14,9 +14,9 @@ CSkybox::~CSkybox()
 void CSkybox::Create(float size)
 {
 
-	m_cubemapTexture.Create("resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_rt.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_lf.jpg",
-		"resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_up.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_dn.jpg",
-		"resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_bk.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_ft.jpg");
+	m_cubemapTexture.Create("resources\\skyboxes\\space\\right.jpg", "resources\\skyboxes\\space\\left.jpg",
+		"resources\\skyboxes\\space\\top.jpg", "resources\\skyboxes\\space\\bottom.jpg",
+		"resources\\skyboxes\\space\\back.jpg", "resources\\skyboxes\\space\\front.jpg");
 
 	
 	
