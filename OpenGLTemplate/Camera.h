@@ -2,6 +2,7 @@
 
 #include "./include/glm/gtc/type_ptr.hpp"
 #include "./include/glm/gtc/matrix_transform.hpp"
+#include <vector>
 
 class CCamera {
 public:
@@ -39,6 +40,9 @@ public:
 
 	// Set the projection matrices
 	void SetPerspectiveProjectionMatrix(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane);
+	
+	std::vector<glm::vec3> GetProps();
+
 	void SetOrthographicProjectionMatrix(int width, int height);
 
 	glm::mat3 ComputeNormalMatrix(const glm::mat4 &modelViewMatrix);

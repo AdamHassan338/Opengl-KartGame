@@ -10,6 +10,7 @@ public:
 	~Quad();
 	void Create(string filename);
 	void Render();
+	void RenderNoTexture();
 	void Release();
 private:
 	std::vector<glm::vec2> m_verticies = { glm::vec2(-1,1),glm::vec2(-1,-1) ,glm::vec2(1,1) ,glm::vec2(1,-1) };

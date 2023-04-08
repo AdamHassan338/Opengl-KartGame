@@ -21,6 +21,16 @@ void CCamera::Set(const glm::vec3 &position, const glm::vec3 &viewpoint, const g
 
 }
 
+std::vector<glm::vec3> CCamera::GetProps()
+{
+	std::vector<glm::vec3> arr;
+	arr.push_back(m_position);
+	arr.push_back(m_view);
+	arr.push_back(m_upVector);
+		
+	return arr;
+}
+
 // Respond to mouse movement
 void CCamera::SetViewByMouse()
 {  
@@ -178,6 +188,7 @@ glm::mat4 CCamera::GetViewMatrix()
 {
 	return glm::lookAt(m_position, m_view, m_upVector);
 }
+
 
 // The normal matrix is used to transform normals to eye coordinates -- part of lighting calculations
 glm::mat3 CCamera::ComputeNormalMatrix(const glm::mat4 &modelViewMatrix)

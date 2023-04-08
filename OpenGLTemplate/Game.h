@@ -5,6 +5,7 @@
 #include "CatmullRom.h"
 #include "Obstacle.h"
 #include "Quad.h"
+#include "FrameBufferObject.h"
 #include <vector>
 // Classes used in game.  For a new class, declare it here and provide a pointer to an object of this class below.  Then, in Game.cpp, 
 // include the header.  In the Game constructor, set the pointer to NULL and in Game::Initialise, create a new object.  Don't forget to 
@@ -24,6 +25,7 @@ class MyObject;
 class CCube;
 class Obstacle;
 class Quad;
+class CFrameBufferObject;
 
 class Game {
 private:
@@ -31,11 +33,13 @@ private:
 	void Initialise();
 	void Update();
 	void Render();
+	void RenderMap();
+	void RenderScene(int pass);
 	void collide();
 
 	// Pointers to game objects.  They will get allocated in Game::Initialise()
 	CSkybox *m_pSkybox;
-	CCamera *m_pCamera;
+	CCamera* m_pCamera;
 	vector <CShaderProgram *> *m_pShaderPrograms;
 	CPlane *m_pPlanarTerrain;
 	CFreeTypeFont *m_pFtFont;
@@ -52,6 +56,8 @@ private:
 	MyObject* m_object;
 	CCube* m_pCube;
 	Quad* m_quad;
+	CFrameBufferObject* m_pFBO;
+
 	//Obstacle* m_obstacle;
 	vector<Obstacle*> m_obstacles;
 	// Some other member variables
@@ -118,6 +124,8 @@ private:
 						FirstPerson,
 						ThirdPerson};
 	int m_cameraMode;
+
+	std::vector<glm::vec3> oldProps;
 
 	//Lights
 	glm::vec4 m_carLightpos;

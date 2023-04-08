@@ -46,7 +46,14 @@ void Quad::Render()
 {
 	glBindVertexArray(m_vao);
 	m_texture.Bind();
-	// Call glDrawArrays to render each side
+	
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void Quad::RenderNoTexture()
+{
+	glBindVertexArray(m_vao);
+	
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
