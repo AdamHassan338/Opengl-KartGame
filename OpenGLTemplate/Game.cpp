@@ -164,10 +164,22 @@ void Game::Initialise()
 	m_pCatmullRom->CreateOffsetCurves(40.0f);
 	m_pCatmullRom->CreateTrack("resources\\textures\\rainbow.png",50); // Downloaded from https://opengameart.org/content/seamless-rainbow-colorsz on 01 April 2023
 	
+	int offsets[] = {0 ,15,-4,8,-12,-1,8,-10,0,6,-8,-15,2,-4};
+
+
 	for (int i = 0; i < m_pCatmullRom->getLength() - 300; i += 300) {
 		m_obstacles.push_back(new Obstacle);
-		m_obstacles.at(m_obstacles.size() - 1)->Create("resources\\textures\\", "warning.jpg");
-		m_obstacles.at(m_obstacles.size() - 1)->set(i+ 300, m_pCatmullRom);
+		//m_obstacles.at(m_obstacles.size() - 1)->Create("resources\\textures\\", "warning.jpg");
+		glm::vec3 p;
+		glm::vec3 pNext;
+		float distance = i + 300;
+		m_pCatmullRom->Sample(distance, p);
+		m_pCatmullRom->Sample(distance + 1.0f, pNext);
+
+
+		int delta = offsets[ i % ( sizeof(offsets) / sizeof(offsets[0]) ) ];
+
+		m_obstacles.at(m_obstacles.size() - 1)->set(i+ 300, delta, m_pCatmullRom);
 	}
 
 
@@ -277,7 +289,7 @@ void Game::Initialise()
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
 	
 	// Create a my object
-	m_object->Create("resources\\textures\\", "stonebrick.jpg");
+	m_object->Create("resources\\textures\\", "warning.jpg");
 
 	m_pCube->Create("resources\\textures\\800px-Smiley.svg.png");
 
@@ -332,7 +344,7 @@ void Game::RenderScene(int pass)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 
 	//
 
@@ -580,6 +592,7 @@ void Game::RenderScene(int pass)
 	pMainProgram->UseProgram();
 	pMainProgram->SetUniform("bUseTexture", true);
 	pMainProgram->SetUniform("sampler0", 0);
+	pMainProgram->SetUniform("cubeMapTex", 1);
 	// Note: cubemap and non-cubemap textures should not be mixed in the same texture unit.  Setting unit 10 to be a cubemap texture.
 
 	//pMainProgram->SetUniform("CubeMapTex", cubeMapTextureUnit);
@@ -608,11 +621,13 @@ void Game::RenderScene(int pass)
 		modelViewMatrixStack.Translate(o->m_pos);
 		modelViewMatrixStack *= o->m_rotation;
 		modelViewMatrixStack.Scale(5.0f);
+		pMainProgram->SetUniform("inverseViewMatrix", glm::inverse(m_pCamera->GetViewMatrix()));
 		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
 		pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
 		//pMainProgram->SetUniform("bUseTexture", false);
-		o->Render();
+		m_pSkybox->m_cubemapTexture.Bind(1);
+		m_object->Render();
 		modelViewMatrixStack.Pop();
 	}
 
@@ -633,10 +648,12 @@ void Game::RenderScene(int pass)
 		modelViewMatrixStack *= o->m_rotation;
 		modelViewMatrixStack.Scale(6.0f);
 		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
+		
 		//pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
 		//pMainProgram->SetUniform("bUseTexture", false);
-		o->Render();
+
+		m_object->Render();
 		modelViewMatrixStack.Pop();
 	}
 
@@ -670,7 +687,7 @@ void Game::Update()
 	if (m_lives <= 0) {
 		return;
 	}
-	//std::cout << glm::to_string(m_pCamera->GetPosition()) << "\n";
+	std::cout << glm::to_string(m_pCamera->GetPosition()) << "\n";
 
 	collide();
 	// TNB Frame
@@ -717,7 +734,7 @@ void Game::Update()
 	m_kartPos += N * m_kartOffset;
 	//update light pos
 	
-	m_carLightpos = glm::vec4(m_kartPos + (4.0f * T) + (6.0f * B),1);
+	m_carLightpos = glm::vec4(m_kartPos + (4.0f * T) + (8.0f * B),1);
 	m_carLightDirection = T;
 	//set camera
 
@@ -874,17 +891,32 @@ void Game::DrawHud()
 			modelMatrix.SetIdentity();
 			modelMatrix.Scale(0.1f);
 			modelMatrix.Translate(glm::vec3(8-i*2, -8, 0));
+			pHudProgam->SetUniform("useTex", true);
 			pHudProgam->SetUniform("model", modelMatrix.Top());
 			m_quad->Render();
 		}
 
-		//draw the minimap
+
+		// draw minimap bg
 		modelMatrix.SetIdentity();
-		modelMatrix.Translate(glm::vec3(-0.7 , -0.7, 0));
-		modelMatrix.Scale(0.3);
+		modelMatrix.Translate(glm::vec3(-0.7, -0.7, 0));
+		modelMatrix.Scale(0.31);
 		pHudProgam->SetUniform("model", modelMatrix.Top());
+		pHudProgam->SetUniform("useTex", false);
+		pHudProgam->SetUniform("colour", glm::vec3(1.0));
 		m_pFBO->BindTexture(0);
 		m_quad->RenderNoTexture();
+
+		//draw the minimap
+		modelMatrix.SetIdentity();
+		modelMatrix.Translate(glm::vec3(-0.7, -0.7, 0));
+		modelMatrix.Scale(0.3);
+		pHudProgam->SetUniform("model", modelMatrix.Top());
+		pHudProgam->SetUniform("useTex", true);
+		m_pFBO->BindTexture(0);
+		m_quad->RenderNoTexture();
+
+
 
 
 		fontProgram->UseProgram();

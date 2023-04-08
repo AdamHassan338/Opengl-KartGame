@@ -19,6 +19,7 @@ void CCube::Create(string filename)
 	m_vbo.Bind();
 	// Write the code to add interleaved vertex attributes to the VBO
 	
+	//front 
 	glm::vec3 v0 = glm::vec3(-1, -1, 1);
 	glm::vec3 v1 = glm::vec3(1, -1, 1);
 	glm::vec3 v2 = glm::vec3(1, 1, 1);
@@ -28,6 +29,47 @@ void CCube::Create(string filename)
 	glm::vec2 t1 = glm::vec2(1, 0);
 	glm::vec2 t2 = glm::vec2(1, 1);
 	glm::vec2 t3 = glm::vec2(0, 1);
+
+	//right //left
+	glm::vec3 v4 = glm::vec3(1, -1, 1);
+	glm::vec3 v5 = glm::vec3(1, -1, -1);
+	glm::vec3 v6 = glm::vec3(1, 1, 1);
+	glm::vec3 v7 = glm::vec3(1, 1, -1);
+	glm::vec3 n2 = glm::vec3(1, 0, 0);
+
+	//back
+	
+	glm::vec3 v8 = glm::vec3(1, -1, -1);
+	glm::vec3 v9 = glm::vec3(-1, -1, -1);
+	glm::vec3 v10 = glm::vec3(1, 1, -1);
+	glm::vec3 v11 = glm::vec3(-1, 1, -1);
+	glm::vec3 n3 = glm::vec3(0, 0, -1);
+
+
+	//right
+	glm::vec3 v12 = glm::vec3(-1, -1, -1);
+	glm::vec3 v13 = glm::vec3(-1, -1, 1);
+	glm::vec3 v14 = glm::vec3(-1, 1, -1);
+	glm::vec3 v15 = glm::vec3(-1, 1, 1);
+	glm::vec3 n4 = glm::vec3(-1, 0, 0);
+
+
+	//top
+	glm::vec3 v16 = glm::vec3(-1, 1, 1);
+	glm::vec3 v17 = glm::vec3(1, 1, 1);
+	glm::vec3 v18 = glm::vec3(-1, 1, -1);
+	glm::vec3 v19 = glm::vec3(1, 1, -1);
+	glm::vec3 n5 = glm::vec3(0, 1, 0);
+
+
+
+	//bottom
+	glm::vec3 v20 = glm::vec3(-1, -1, 1);
+	glm::vec3 v21 = glm::vec3(-1, -1, -1);
+	glm::vec3 v22 = glm::vec3(1, -1, 1);
+	glm::vec3 v23 = glm::vec3(1, -1, -1);
+	glm::vec3 n6 = glm::vec3(0, -1, 0);
+
 
 	m_vbo.AddData(&v0, sizeof(glm::vec3));
 	m_vbo.AddData(&t0, sizeof(glm::vec2));
@@ -41,6 +83,77 @@ void CCube::Create(string filename)
 	m_vbo.AddData(&v2, sizeof(glm::vec3));
 	m_vbo.AddData(&t2, sizeof(glm::vec2));
 	m_vbo.AddData(&n, sizeof(glm::vec3));
+
+	m_vbo.AddData(&v4, sizeof(glm::vec3));
+	m_vbo.AddData(&t0, sizeof(glm::vec2));
+	m_vbo.AddData(&n2, sizeof(glm::vec3));
+	m_vbo.AddData(&v5, sizeof(glm::vec3));
+	m_vbo.AddData(&t1, sizeof(glm::vec2));
+	m_vbo.AddData(&n2, sizeof(glm::vec3));
+	m_vbo.AddData(&v6, sizeof(glm::vec3));
+	m_vbo.AddData(&t3, sizeof(glm::vec2));
+	m_vbo.AddData(&n2, sizeof(glm::vec3));
+	m_vbo.AddData(&v7, sizeof(glm::vec3));
+	m_vbo.AddData(&t2, sizeof(glm::vec2));
+	m_vbo.AddData(&n2, sizeof(glm::vec3));
+
+
+
+	m_vbo.AddData(&v8, sizeof(glm::vec3));
+	m_vbo.AddData(&t0, sizeof(glm::vec2));
+	m_vbo.AddData(&n3, sizeof(glm::vec3));
+	m_vbo.AddData(&v9, sizeof(glm::vec3));
+	m_vbo.AddData(&t1, sizeof(glm::vec2));
+	m_vbo.AddData(&n3, sizeof(glm::vec3));
+	m_vbo.AddData(&v10, sizeof(glm::vec3));
+	m_vbo.AddData(&t3, sizeof(glm::vec2));
+	m_vbo.AddData(&n3, sizeof(glm::vec3));
+	m_vbo.AddData(&v11, sizeof(glm::vec3));
+	m_vbo.AddData(&t2, sizeof(glm::vec2));
+	m_vbo.AddData(&n3, sizeof(glm::vec3));
+
+
+	m_vbo.AddData(&v12, sizeof(glm::vec3));
+	m_vbo.AddData(&t0, sizeof(glm::vec2));
+	m_vbo.AddData(&n4, sizeof(glm::vec3));
+	m_vbo.AddData(&v13, sizeof(glm::vec3));
+	m_vbo.AddData(&t1, sizeof(glm::vec2));
+	m_vbo.AddData(&n4, sizeof(glm::vec3));
+	m_vbo.AddData(&v14, sizeof(glm::vec3));
+	m_vbo.AddData(&t3, sizeof(glm::vec2));
+	m_vbo.AddData(&n4, sizeof(glm::vec3));
+	m_vbo.AddData(&v15, sizeof(glm::vec3));
+	m_vbo.AddData(&t2, sizeof(glm::vec2));
+	m_vbo.AddData(&n4, sizeof(glm::vec3));
+
+
+	m_vbo.AddData(&v16, sizeof(glm::vec3));
+	m_vbo.AddData(&t0, sizeof(glm::vec2));
+	m_vbo.AddData(&n5, sizeof(glm::vec3));
+	m_vbo.AddData(&v17, sizeof(glm::vec3));
+	m_vbo.AddData(&t1, sizeof(glm::vec2));
+	m_vbo.AddData(&n5, sizeof(glm::vec3));
+	m_vbo.AddData(&v18, sizeof(glm::vec3));
+	m_vbo.AddData(&t3, sizeof(glm::vec2));
+	m_vbo.AddData(&n5, sizeof(glm::vec3));
+	m_vbo.AddData(&v19, sizeof(glm::vec3));
+	m_vbo.AddData(&t2, sizeof(glm::vec2));
+	m_vbo.AddData(&n5, sizeof(glm::vec3));
+
+
+	m_vbo.AddData(&v20, sizeof(glm::vec3));
+	m_vbo.AddData(&t0, sizeof(glm::vec2));
+	m_vbo.AddData(&n6, sizeof(glm::vec3));
+	m_vbo.AddData(&v21, sizeof(glm::vec3));
+	m_vbo.AddData(&t1, sizeof(glm::vec2));
+	m_vbo.AddData(&n6, sizeof(glm::vec3));
+	m_vbo.AddData(&v22, sizeof(glm::vec3));
+	m_vbo.AddData(&t3, sizeof(glm::vec2));
+	m_vbo.AddData(&n6, sizeof(glm::vec3));
+	m_vbo.AddData(&v23, sizeof(glm::vec3));
+	m_vbo.AddData(&t2, sizeof(glm::vec2));
+	m_vbo.AddData(&n6, sizeof(glm::vec3));
+
 
 
 	// Upload data to GPU
@@ -62,7 +175,7 @@ void CCube::Render()
 	glBindVertexArray(m_vao);
 	m_texture.Bind();
 	// Call glDrawArrays to render each side
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 24);
 }
 void CCube::Release()
 {

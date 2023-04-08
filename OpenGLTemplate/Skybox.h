@@ -13,10 +13,10 @@ public:
 	void Create(float size);
 	void Render(int textureUnit);
 	void Release();
-
+	CCubemap m_cubemapTexture;
 private:
 	UINT m_vao;
 	CVertexBufferObject m_vbo;
-	CCubemap m_cubemapTexture;
+	
 	
 };

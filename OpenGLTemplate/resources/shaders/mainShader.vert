@@ -22,6 +22,7 @@ out vec3 vColour;	// Colour computed using reflectance model
 out vec2 vTexCoord;	// Texture coordinate
 
 
+
 out vec3 n;
 out vec4 p;
 

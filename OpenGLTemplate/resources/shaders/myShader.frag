@@ -8,9 +8,13 @@ in vec3 normal;
 out vec4 fragColour;
 
 uniform sampler2D sampler0;  // The texture sampler
+uniform samplerCube cubeMapTex;
+in vec3 reflected;
+
 
 void main(){
 
 	vec4 vTexColour = texture(sampler0, texCoord);
 	fragColour = vTexColour;
+	//fragColour = texture(cubeMapTex, normalize(reflected));
 }
