@@ -90,6 +90,7 @@ Game::~Game()
 	delete m_pHorseMesh;
 	delete m_pKartMesh;
 	delete m_stoneMesh;
+	delete m_planet;
 	delete m_pSphere;
 	delete m_pAudio;
 	delete m_pCatmullRom;
@@ -147,6 +148,7 @@ void Game::Initialise()
 	m_pFigherMesh = new COpenAssetImportMesh;
 	m_pKartMesh = new COpenAssetImportMesh;
 	m_stoneMesh = new COpenAssetImportMesh;
+	m_planet = new COpenAssetImportMesh;
 	m_pSphere = new CSphere;
 	m_pAudio = new CAudio;
 	m_object = new MyObject;
@@ -265,6 +267,8 @@ void Game::Initialise()
 	m_pFigherMesh->Load("resources\\models\\Fighter\\fighter1.obj");
 	m_pKartMesh->Load("resources\\models\\kart\\kart3.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023
 	m_stoneMesh->Load("resources\\models\\Stone\\stone.obj"); // Downloaded from https://opengameart.org/content/stones on 06 April 2023
+	m_planet->Load("resources\\models\\planet\\Planet.obj"); // Downloaded from https://opengameart.org/content/low-poly-planet-0 on 07 April 2023
+
 
 	// Create a sphere
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
@@ -328,22 +332,29 @@ void Game::Render()
 	
 	// Set light and materials in main shader program
 	glm::vec4 lightPosition1 = glm::vec4(-100, 100, -100, 1); // Position of light source *in world coordinates*
-	pMainProgram->SetUniform("light1.position", viewMatrix * lightPosition1); // Position of light source *in eye coordinates*
-	pMainProgram->SetUniform("light1.La", glm::vec3(0.5));		// Ambient colour of light
-	pMainProgram->SetUniform("light1.Ld", glm::vec3(.8f));		// Diffuse colour of light
-	pMainProgram->SetUniform("light1.Ls", glm::vec3(1.0f));		// Specular colour of light
+	pMainProgram->SetUniform("worldLight.position", viewMatrix * lightPosition1); // Position of light source *in eye coordinates*
+	pMainProgram->SetUniform("worldLight.La", glm::vec3(0.3));		// Ambient colour of light
+	pMainProgram->SetUniform("worldLight.Ld", glm::vec3(.8f));		// Diffuse colour of light
+	pMainProgram->SetUniform("worldLight.Ls", glm::vec3(1.0f));		// Specular colour of light
 	pMainProgram->SetUniform("material1.Ma", glm::vec3(1.0f));	// Ambient material reflectance
-	pMainProgram->SetUniform("material1.Md", glm::vec3(0.0f));	// Diffuse material reflectance
-	pMainProgram->SetUniform("material1.Ms", glm::vec3(0.0f));	// Specular material reflectance
+	pMainProgram->SetUniform("material1.Md", glm::vec3(1.0f));	// Diffuse material reflectance
+	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance
 	pMainProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
 
 
 	// Set light and materials in main shader program
-	m_spotLightpos; // Position of light source *in world coordinates*
-	pMainProgram->SetUniform("light2.position", viewMatrix * m_spotLightpos); // Position of light source *in eye coordinates*
-	pMainProgram->SetUniform("light2.La", glm::vec3(0,0,0));		// Ambient colour of light
-	pMainProgram->SetUniform("light2.Ld", glm::vec3(1.0f));		// Diffuse colour of light
-	pMainProgram->SetUniform("light2.Ls", glm::vec3(1.0f));		// Specular colour of light
+	m_carLightpos; // Position of light source *in world coordinates*
+	pMainProgram->SetUniform("carLight.position", viewMatrix * m_carLightpos); // Position of light source *in eye coordinates*
+	pMainProgram->SetUniform("carLight.La", glm::vec3(0));		// Ambient colour of light
+	pMainProgram->SetUniform("carLight.Ld", glm::vec3(10.0f));		// Diffuse colour of light
+	pMainProgram->SetUniform("carLight.Ls", glm::vec3(5.0f));		// Specular colour of light
+	pMainProgram->SetUniform("carLight.direction", glm::normalize(viewNormalMatrix *m_carLightDirection));		// Specular colour of light
+	pMainProgram->SetUniform("carLight.exponent", 20.f);		// exponent of light
+	pMainProgram->SetUniform("carLight.constant", 1.0f);
+	pMainProgram->SetUniform("carLight.linear", 0.01f);
+	pMainProgram->SetUniform("carLight.cutoff", 30.0f);		// Specular colour of light
+	pMainProgram->SetUniform("carLight.attenuationExp;", 0.00001f);		// Specular colour of light
+
 
 		
 
@@ -508,6 +519,18 @@ void Game::Render()
 		modelViewMatrixStack.Pop();
 	}
 
+	//render the planet
+
+	modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(320, 30, 500));
+		modelViewMatrixStack.Scale(30);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		pMainProgram->SetUniform("bUseTexture", true);
+		m_planet->Render();
+	modelViewMatrixStack.Pop();
+
 	// Use the my shader program 
 	pMainProgram = (*m_pShaderPrograms)[2];
 	pMainProgram->UseProgram();
@@ -586,6 +609,8 @@ void Game::Render()
 	//draw hud
 	DrawHud();
 
+
+
 	// Swap buffers to show the rendered image
 	SwapBuffers(m_gameWindow.Hdc());		
 
@@ -610,6 +635,10 @@ void Game::collide() {
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
+
+	if (m_lives <= 0) {
+		return;
+	}
 	std::cout << glm::to_string(m_pCamera->GetPosition()) << "\n";
 
 	collide();
@@ -657,8 +686,8 @@ void Game::Update()
 	m_kartPos += N * m_kartOffset;
 	//update light pos
 	
-	m_spotLightpos = glm::vec4(m_kartPos + (4.0f * T) + (6.0f * B),1);
-
+	m_carLightpos = glm::vec4(m_kartPos + (4.0f * T) + (6.0f * B),1);
+	m_carLightDirection = T;
 	//set camera
 
 	if (m_cameraMode == Game::Freecam) {
@@ -824,7 +853,11 @@ void Game::DrawHud()
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		m_pFtFont->Render(700, height - 550, 20, "Lives");
 
+		if (m_lives <= 0) {
+			m_pFtFont->Render(width - width/2 - 200, height - height/2, 100, "You lost");
+		}
 
+		
 
 
 }

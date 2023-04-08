@@ -44,6 +44,7 @@ private:
 	COpenAssetImportMesh* m_pFigherMesh;
 	COpenAssetImportMesh* m_pKartMesh;
 	COpenAssetImportMesh* m_stoneMesh;
+	COpenAssetImportMesh* m_planet;
 	CSphere *m_pSphere;
 	CHighResolutionTimer *m_pHighResolutionTimer;
 	CAudio *m_pAudio;
@@ -119,5 +120,9 @@ private:
 	int m_cameraMode;
 
 	//Lights
-	glm::vec4 m_spotLightpos;
+	glm::vec4 m_carLightpos;
+	glm::vec3 m_carLightDirection;
+
+	//game state
+	bool m_end = false;
 };

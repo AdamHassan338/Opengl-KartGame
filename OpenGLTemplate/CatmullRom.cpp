@@ -42,6 +42,7 @@ void CCatmullRom::SetControlPoints()
 	m_controlPoints.push_back(glm::vec3(71, 10, -71));
 	*/
 
+
 	m_controlPoints.push_back(glm::vec3(0, 5, 0));
 	m_controlPoints.push_back(glm::vec3(120, 5, 0));
 	m_controlPoints.push_back(glm::vec3(270, 25, 125));
@@ -58,6 +59,8 @@ void CCatmullRom::SetControlPoints()
 	m_controlPoints.push_back(glm::vec3(-270, 5,240));
 	m_controlPoints.push_back(glm::vec3(-180, 5,65));
 	m_controlPoints.push_back(glm::vec3(-120, 5, 0));
+	
+
 
 
 
