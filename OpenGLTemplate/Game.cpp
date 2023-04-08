@@ -57,12 +57,8 @@ Game::Game()
 	m_pShaderPrograms = NULL;
 	m_pPlanarTerrain = NULL;
 	m_pFtFont = NULL;
-	m_pBarrelMesh = NULL;
-	m_pHorseMesh = NULL;
-	m_pFigherMesh = NULL;
 	m_pKartMesh = NULL;
 	m_stoneMesh = NULL;
-	m_pSphere = NULL;
 	m_pHighResolutionTimer = NULL;
 	m_pAudio = NULL;
 	m_pCatmullRom = NULL;
@@ -70,7 +66,7 @@ Game::Game()
 	m_pCube = NULL;
 	m_quad = NULL;
 	m_pFBO = NULL;
-	//m_obstacle = NULL;
+
 	m_dt = 0.0;
 	m_framesPerSecond = 0;
 	m_frameCount = 0;
@@ -87,16 +83,12 @@ Game::~Game()
 	delete m_pSkybox;
 	delete m_pPlanarTerrain;
 	delete m_pFtFont;
-	delete m_pBarrelMesh;
-	delete m_pHorseMesh;
 	delete m_pKartMesh;
 	delete m_stoneMesh;
 	delete m_planet;
-	delete m_pSphere;
 	delete m_pAudio;
 	delete m_pCatmullRom;
 	delete m_object;
-	delete m_pFigherMesh;
 	delete m_pCube;
 	delete m_quad;
 	delete m_pFBO;
@@ -117,8 +109,7 @@ void Game::Initialise()
 {
 
 	m_t = 0;
-	m_spaceShipPosition = glm::vec3(0);
-	m_spaceShipOrientation = glm::mat4(1);
+
 	m_cameraRotation = 0;
 	m_cameraMode = Game::Freecam;
 
@@ -145,13 +136,9 @@ void Game::Initialise()
 	m_pShaderPrograms = new vector <CShaderProgram *>;
 	m_pPlanarTerrain = new CPlane;
 	m_pFtFont = new CFreeTypeFont;
-	m_pBarrelMesh = new COpenAssetImportMesh;
-	m_pHorseMesh = new COpenAssetImportMesh;
-	m_pFigherMesh = new COpenAssetImportMesh;
 	m_pKartMesh = new COpenAssetImportMesh;
 	m_stoneMesh = new COpenAssetImportMesh;
 	m_planet = new COpenAssetImportMesh;
-	m_pSphere = new CSphere;
 	m_pAudio = new CAudio;
 	m_object = new MyObject;
 	m_pCatmullRom = new CCatmullRom;
@@ -277,16 +264,11 @@ void Game::Initialise()
 	m_pFtFont->SetShaderProgram(pFontProgram);
 
 	// Load some meshes in OBJ format
-	m_pBarrelMesh->Load("resources\\models\\Barrel\\Barrel02.obj");  // Downloaded from http://www.psionicgames.com/?page_id=24 on 24 Jan 2013
-	m_pHorseMesh->Load("resources\\models\\Horse\\Horse2.obj");  // Downloaded from http://opengameart.org/content/horse-lowpoly on 24 Jan 2013
-	m_pFigherMesh->Load("resources\\models\\Fighter\\fighter1.obj");
 	m_pKartMesh->Load("resources\\models\\kart\\kart3.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023
 	m_stoneMesh->Load("resources\\models\\Stone\\stone.obj"); // Downloaded from https://opengameart.org/content/stones on 06 April 2023
 	m_planet->Load("resources\\models\\planet\\Planet.obj"); // Downloaded from https://opengameart.org/content/low-poly-planet-0 on 07 April 2023
 
 
-	// Create a sphere
-	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
 	
 	// Create a my object
 	m_object->Create("resources\\textures\\", "warning.jpg");
@@ -365,17 +347,18 @@ void Game::RenderScene(int pass)
 	
 	// Set the projection matrix
 
-	//std::cout << glm::to_string(a) << "\n" << glm::to_string(b) << "\n" << glm::to_string(c);
+
+	//switch between top down camera and game camera
+	static std::vector<glm::vec3> cameraProps;
+
 	if (pass == 0){
-		oldProps = m_pCamera->GetProps();
+		cameraProps = m_pCamera->GetProps();
 		m_pCamera->Set(glm::vec3(260, 880, 400), glm::vec3(259, 0, 399), glm::vec3(0, 0, -1));
-		
 		pMainProgram->SetUniform("matrices.projMatrix", m_pCamera->GetPerspectiveProjectionMatrix());
 		
 	}
 	else {
-		m_pCamera->Set(oldProps.at(0), oldProps.at(1), oldProps.at(2));
-		//perspective = m_pCamera->GetPerspectiveProjectionMatrix();
+		m_pCamera->Set(cameraProps.at(0), cameraProps.at(1), cameraProps.at(2));
 		pMainProgram->SetUniform("matrices.projMatrix", m_pCamera->GetPerspectiveProjectionMatrix());
 		}
 	
@@ -440,73 +423,8 @@ void Game::RenderScene(int pass)
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance	
 
 
-	// Render the horse 
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(0.0f, 0.0f, 0.0f));
-	//modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
-	modelViewMatrixStack.Scale(2.5f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pHorseMesh->Render();
-	modelViewMatrixStack.Pop();
-
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(150.0f, 0.0f, 2.0f));
-	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 25.0f);
-	modelViewMatrixStack.Scale(2.5f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pHorseMesh->Render();
-	modelViewMatrixStack.Pop();
 
 
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(100.0f, 0.0f, 5.0f));
-	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 220.0f);
-	modelViewMatrixStack.Scale(2.5f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pHorseMesh->Render();
-	modelViewMatrixStack.Pop();
-
-	//Render the Figher
-	modelViewMatrixStack.Push();
-	//modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.f));
-	modelViewMatrixStack.Translate(m_spaceShipPosition);
-	modelViewMatrixStack *= m_spaceShipOrientation;
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pFigherMesh->Render();
-	modelViewMatrixStack.Pop();
-
-
-
-
-
-	// Render the barrel 
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(100.0f, 0.0f, 0.0f));
-	modelViewMatrixStack.Scale(5.0f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pBarrelMesh->Render();
-	modelViewMatrixStack.Pop();
-
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(110.0f, 0.0f, 0.0f));
-	modelViewMatrixStack.Scale(2.5f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pBarrelMesh->Render();
-	modelViewMatrixStack.Pop();
-
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(90.0f, 0.0f, 0.0f));
-	modelViewMatrixStack.Scale(10.0f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pBarrelMesh->Render();
-	modelViewMatrixStack.Pop();
 
 	// Render the cube
 	modelViewMatrixStack.Push();
@@ -517,21 +435,6 @@ void Game::RenderScene(int pass)
 	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
 	//pMainProgram->SetUniform("bUseTexture", false);
 	m_pCube->Render();
-	modelViewMatrixStack.Pop();
-
-
-
-
-
-	// Render the sphere
-	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(0.0f, 6.0f, 150.0f));
-	modelViewMatrixStack.Scale(6.0f);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-	//pMainProgram->SetUniform("bUseTexture", false);
-	//m_pSphere->Render();
 	modelViewMatrixStack.Pop();
 
 
@@ -578,13 +481,13 @@ void Game::RenderScene(int pass)
 	//render the planet
 
 	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(320, 30, 500));
-	modelViewMatrixStack.Scale(30);
-	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-	pMainProgram->SetUniform("bUseTexture", true);
-	m_planet->Render();
+		modelViewMatrixStack.Translate(glm::vec3(320, 30, 500));
+		modelViewMatrixStack.Scale(30);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		pMainProgram->SetUniform("bUseTexture", true);
+		m_planet->Render();
 	modelViewMatrixStack.Pop();
 
 	// Use the my shader program 
@@ -603,13 +506,13 @@ void Game::RenderScene(int pass)
 
 	// Render the my Object
 	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(25.0f, 0.0f, 150.0f));
-	modelViewMatrixStack.Scale(5.0f);
-	pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
-	pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-	//pMainProgram->SetUniform("bUseTexture", false);
-	m_object->Render();
+		modelViewMatrixStack.Translate(glm::vec3(25.0f, 0.0f, 150.0f));
+		modelViewMatrixStack.Scale(5.0f);
+		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		//m_object->Render();
 	modelViewMatrixStack.Pop();
 
 
@@ -618,16 +521,18 @@ void Game::RenderScene(int pass)
 	// Render the my Obstacle
 	for (Obstacle* o : m_obstacles) {
 		modelViewMatrixStack.Push();
-		modelViewMatrixStack.Translate(o->m_pos);
-		modelViewMatrixStack *= o->m_rotation;
-		modelViewMatrixStack.Scale(5.0f);
-		pMainProgram->SetUniform("inverseViewMatrix", glm::inverse(m_pCamera->GetViewMatrix()));
-		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-		//pMainProgram->SetUniform("bUseTexture", false);
-		m_pSkybox->m_cubemapTexture.Bind(1);
-		m_object->Render();
+
+			modelViewMatrixStack.Translate(o->m_pos);
+			modelViewMatrixStack *= o->m_rotation;
+			modelViewMatrixStack.Scale(5.0f);
+
+			pMainProgram->SetUniform("inverseViewMatrix", glm::inverse(m_pCamera->GetViewMatrix()));
+			pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
+			pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+
+			m_pSkybox->m_cubemapTexture.Bind(1);
+			m_object->Render();
+
 		modelViewMatrixStack.Pop();
 	}
 
@@ -644,16 +549,15 @@ void Game::RenderScene(int pass)
 	// Render the my Obstacle with outline
 	for (Obstacle* o : m_obstacles) {
 		modelViewMatrixStack.Push();
-		modelViewMatrixStack.Translate(o->m_pos.x, o->m_pos.y - 0.5, o->m_pos.z);
-		modelViewMatrixStack *= o->m_rotation;
-		modelViewMatrixStack.Scale(6.0f);
-		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
-		
-		//pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-		//pMainProgram->SetUniform("bUseTexture", false);
 
-		m_object->Render();
+			modelViewMatrixStack.Translate(o->m_pos.x, o->m_pos.y - 0.5, o->m_pos.z);
+			modelViewMatrixStack *= o->m_rotation;
+			modelViewMatrixStack.Scale(6.0f);
+
+			pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
+
+			m_object->Render();
+
 		modelViewMatrixStack.Pop();
 	}
 
@@ -665,6 +569,7 @@ void Game::RenderScene(int pass)
 }
 
 void Game::collide() {
+	// radius collison
 	for (std::vector<Obstacle*>::iterator it = m_obstacles.begin(); it != m_obstacles.end();) {
 		
 		if (glm::distance(m_kartPos, (*it)->m_pos) < 10.0f) {
@@ -690,7 +595,7 @@ void Game::Update()
 	std::cout << glm::to_string(m_pCamera->GetPosition()) << "\n";
 
 	collide();
-	// TNB Frame
+							// TNB Frame
 	m_currentDistance += m_dt * m_speed;
 	glm::vec3 p;
 	glm::vec3 pNext;
@@ -702,19 +607,20 @@ void Game::Update()
 	glm::vec3 N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
 	glm::vec3 B = glm::normalize(glm::cross(N, T));
 
-	float w = 40.0f;
+	float w = 40.0f;//track width
 
 
 	glm::vec3 l = p - (w / 2) * N;
 	glm::vec3 r = p + (w / 2) * N;
 
-	// Cart update
-	//glm::vec3 up = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, T);
+						// Cart update
+	
 
 	m_kartPos = glm::vec3(p.x, p.y - 1, p.z);
 	m_kartRoation = glm::mat4(glm::mat3(T, B, N));
 	//glm::vec3 oldPos = m_kartPos;
 
+	//kart controles
 	if(m_cameraMode != Game::Freecam){
 		if (m_moveRight) {
 			m_kartOffset += m_dt * m_turnSpeed;
@@ -731,14 +637,18 @@ void Game::Update()
 		}
 	}
 
+	//move kart lateraly on track
 	m_kartPos += N * m_kartOffset;
-	//update light pos
+
+	//update kart light 
 	
 	m_carLightpos = glm::vec4(m_kartPos + (4.0f * T) + (8.0f * B),1);
 	m_carLightDirection = T;
-	//set camera
+
+									//set camera
 
 	if (m_cameraMode == Game::Freecam) {
+		//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
 		m_pCamera->Update(m_dt);
 	}
 	if (m_cameraMode == Game::FirstPerson) {
@@ -754,7 +664,7 @@ void Game::Update()
 		glm::vec3 newPos = m_kartPos + (20.0f * B) - (30.0f * T);
 		m_pCamera->Set(newPos, m_kartPos + (20.0f * T), B);
 	}
-	//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
+	
 	
 
 	
@@ -770,54 +680,8 @@ void Game::Update()
 	}
 	
 
-	
-	//m_pCamera->Set(p, 10.0f* t + p , up);
-	/*
-	m_t += 0.001f * (float)m_dt;
-	
-	float radius = 75.0f;
-	glm::vec3 x = glm::vec3(1, 0, 0);
-	glm::vec3 y = glm::vec3(0, 1, 0);
-	glm::vec3 z = glm::vec3(0, 0, 1);
-	m_spaceShipPosition = radius * cos(m_t) * x + 50.0f * y + radius * sin(m_t) * z;
-
-	
-	//glm::vec3 T = glm::normalize(-radius * sin(m_t) * x + radius * cos(m_t) * z);
-	//glm::vec3 N = glm::normalize(glm::cross(T, y));
-	//glm::vec3 B = glm::normalize(glm::cross(N, T));
-
-	m_spaceShipOrientation = glm::mat4(glm::mat3(T, B, N));
-	*/
-	/*
-	int distance = 30;
-	static double theta = 0;
-
-	float x = 25;
-	float z = 150;
-	float y = 15;
-	glm::vec3 position = { 25,15,150 };
-
-	double angularS = 1.0;
-
-	position.x += distance * sin(theta);
-	position.z += distance * cos(theta);
-
-	m_pCamera->Set(position, glm::vec3(25.0f, 0.0f, 150.0f),glm::vec3(0,1,0));
-	theta += angularS * m_dt/(double)1000;
-	*/
-
 	m_pAudio->Update();
 	
-
-/*
-static float t = 0.0f;
-t += 0.0005f * (float)m_dt;
-if (t > 1.0f)
-	t = 0.0f;
-glm::vec3 x = m_spline.Interpolate(p0, p1, p2, p3, t);
-m_pCamera->Set(x, { 0,0,0 }, {0,1,0});
-*/
-//m_pCamera->Set(glm::vec3(0, 0, 0), { 100,0,0 }, { 0,1,0 });
 }
 
 

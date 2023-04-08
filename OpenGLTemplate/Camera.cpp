@@ -119,19 +119,19 @@ void CCamera::Update(double dt)
 void CCamera::TranslateByKeyboard(double dt)
 {
 	if (GetKeyState(VK_UP) & 0x80 || GetKeyState('W') & 0x80) {
-		Advance(1.0*dt);
+		Advance(3.0*dt);
 	}
 
 	if (GetKeyState(VK_DOWN) & 0x80 || GetKeyState('S') & 0x80) {
-		Advance(-1.0*dt);
+		Advance(-3.0*dt);
 	}
 
 	if (GetKeyState(VK_LEFT) & 0x80 || GetKeyState('A') & 0x80) {
-		Strafe(-1.0*dt);
+		Strafe(-3.0*dt);
 	}
 
 	if (GetKeyState(VK_RIGHT) & 0x80 || GetKeyState('D') & 0x80) {
-		Strafe(1.0*dt);
+		Strafe(3.0*dt);
 	}
 }
 // Return the camera position

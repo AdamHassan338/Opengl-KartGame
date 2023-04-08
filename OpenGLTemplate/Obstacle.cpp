@@ -13,7 +13,7 @@ Obstacle::~Obstacle()
 
 
 
-void Obstacle::set(float distance, int offset, CCatmullRom* path)
+void Obstacle::set(float distance, int offset, CCatmullRom* path)//set postion along the center line
 {
 	
 	glm::vec3 up;

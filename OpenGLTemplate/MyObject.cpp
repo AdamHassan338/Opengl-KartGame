@@ -252,7 +252,7 @@ void MyObject::Render()
 	glBindVertexArray(vao);
 	m_texture.Bind();
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, NULL);
-	//glDrawArrays(GL_TRIANGLES, 0, m_indices.size());
+	
 	//printf("rending\n");
 
 }
