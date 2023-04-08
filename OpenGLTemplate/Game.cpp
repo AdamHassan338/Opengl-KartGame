@@ -149,7 +149,7 @@ void Game::Initialise()
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
 	m_pCatmullRom->CreateOffsetCurves(40.0f);
-	m_pCatmullRom->CreateTrack("resources\\textures\\rainbow.png",50); // Downloaded from https://opengameart.org/content/seamless-rainbow-colorsz on 01 April 2023
+	m_pCatmullRom->CreateTrack("resources\\textures\\rainbow.png",50); // Downloaded from https://opengameart.org/content/seamless-rainbow-colors on 01 April 2023 Licence: CC0
 	
 	int offsets[] = {0 ,15,-4,8,-12,-1,8,-10,0,6,-8,-15,2,-4};
 
@@ -264,19 +264,19 @@ void Game::Initialise()
 	m_pFtFont->SetShaderProgram(pFontProgram);
 
 	// Load some meshes in OBJ format
-	m_pKartMesh->Load("resources\\models\\kart\\kart3.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023
-	m_stoneMesh->Load("resources\\models\\Stone\\stone.obj"); // Downloaded from https://opengameart.org/content/stones on 06 April 2023
-	m_planet->Load("resources\\models\\planet\\Planet.obj"); // Downloaded from https://opengameart.org/content/low-poly-planet-0 on 07 April 2023
+	m_pKartMesh->Load("resources\\models\\kart\\kart3.obj"); // Downloaded from https://opengameart.org/content/racing-kart on 01 April 2023 Licence: CC0
+	m_stoneMesh->Load("resources\\models\\Stone\\stone.obj"); // Downloaded from https://opengameart.org/content/stones on 06 April 2023 Licence: CC-BY 3.0
+	m_planet->Load("resources\\models\\planet\\Planet.obj"); // Downloaded from https://opengameart.org/content/low-poly-planet-0 on 07 April 2023 Licence: CC0
 
 
 	
 	// Create a my object
-	m_object->Create("resources\\textures\\", "warning.jpg");
+	m_object->Create("resources\\textures\\", "warning.jpg"); // Downloaded from https://www.publicdomainpictures.net/en/view-image.php?image=483861 on 07 April 2023 Licence: CC0 
 
 	m_pCube->Create("resources\\textures\\800px-Smiley.svg.png");
 
 	//create hud quad
-	m_quad->Create("resources\\textures\\heart.png");
+	m_quad->Create("resources\\textures\\heart.png"); // Downloaded from https://opengameart.org/content/heart-1 on 06 April 2023 Licence: CC0
 	
 	glEnable(GL_CULL_FACE);
 
@@ -427,9 +427,13 @@ void Game::RenderScene(int pass)
 
 
 	// Render the cube
+
+	glm::vec3 cubePos;
+	m_pCatmullRom->Sample(m_pCatmullRom->getLength() - 10.0f, cubePos);
+	cubePos.y += 7;
 	modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(glm::vec3(0, 2, 0));
-	modelViewMatrixStack.Scale(2.0f);
+	modelViewMatrixStack.Translate(cubePos);
+	modelViewMatrixStack.Scale(10.0f);
 	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
@@ -577,19 +581,30 @@ void Game::collide() {
 			m_lives--;	
 			it = m_obstacles.erase(it);
 			printf("hit\n");
+			if (m_lives <= 0)
+				m_end = true;
 			
 		}
 		else {
 			it++;
 		}
 	}
+	glm::vec3 p;
+	m_pCatmullRom->Sample(m_pCatmullRom->getLength() - 10.0f, p);
+	
+	if (glm::distance(p, m_kartPos) < 10.0f) {
+		m_end = true;
+		m_won = true;
+	}
+
+
 }
 
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
 
-	if (m_lives <= 0) {
+	if (m_end == true) {
 		return;
 	}
 	std::cout << glm::to_string(m_pCamera->GetPosition()) << "\n";
@@ -790,7 +805,10 @@ void Game::DrawHud()
 		m_pFtFont->Render(700, height - 550, 20, "Lives");
 
 		if (m_lives <= 0) {
-			m_pFtFont->Render(width - width/2 - 200, height - height/2, 100, "You lost");
+			m_pFtFont->Render(width - width / 2 - 200, height - height / 2, 100, "You lost");
+		}
+		if (m_won) {
+			m_pFtFont->Render(width - width / 2 - 200, height - height / 2, 100, "You won");
 		}
 
 		

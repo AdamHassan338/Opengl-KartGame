@@ -16,7 +16,7 @@ void CSkybox::Create(float size)
 
 	m_cubemapTexture.Create("resources\\skyboxes\\space\\right.jpg", "resources\\skyboxes\\space\\left.jpg",
 		"resources\\skyboxes\\space\\top.jpg", "resources\\skyboxes\\space\\bottom.jpg",
-		"resources\\skyboxes\\space\\back.jpg", "resources\\skyboxes\\space\\front.jpg");
+		"resources\\skyboxes\\space\\back.jpg", "resources\\skyboxes\\space\\front.jpg");// // Downloaded from https://tools.wwwtyro.net/space-3d 01 April 2023 Licence: Unlicense license
 
 	
 	

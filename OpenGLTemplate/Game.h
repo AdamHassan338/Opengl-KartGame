@@ -133,4 +133,5 @@ private:
 
 	//game state
 	bool m_end = false;
+	bool m_won = false;
 };
