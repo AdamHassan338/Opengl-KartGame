@@ -161,7 +161,7 @@ void Game::Initialise()
 	
 	for (int i = 0; i < m_pCatmullRom->getLength() - 300; i += 300) {
 		m_obstacles.push_back(new Obstacle);
-		m_obstacles.at(m_obstacles.size() - 1)->Create("resources\\textures\\", "stonebrick.jpg");
+		m_obstacles.at(m_obstacles.size() - 1)->Create("resources\\textures\\", "warning.jpg");
 		m_obstacles.at(m_obstacles.size() - 1)->set(i+ 300, m_pCatmullRom);
 	}
 
@@ -186,6 +186,8 @@ void Game::Initialise()
 	sShaderFileNames.push_back("myShader.vert");
 	sShaderFileNames.push_back("hudShader.vert");
 	sShaderFileNames.push_back("hudShader.frag");
+	sShaderFileNames.push_back("stencilShader.vert");
+	sShaderFileNames.push_back("stencilShader.frag");
 
 
 	for (int i = 0; i < (int) sShaderFileNames.size(); i++) {
@@ -228,13 +230,22 @@ void Game::Initialise()
 
 
 
-	// Create a shader program for my object
+	// Create a shader program for my hud
 	CShaderProgram* pHudProgam = new CShaderProgram;
 	pHudProgam->CreateProgram();
 	pHudProgam->AddShaderToProgram(&shShaders[6]);
 	pHudProgam->AddShaderToProgram(&shShaders[7]);
 	pHudProgam->LinkProgram();
 	m_pShaderPrograms->push_back(pHudProgam);
+
+
+	// Create a shader program for my outline
+	CShaderProgram* pStencilProgam = new CShaderProgram;
+	pStencilProgam->CreateProgram();
+	pStencilProgam->AddShaderToProgram(&shShaders[8]);
+	pStencilProgam->AddShaderToProgram(&shShaders[9]);
+	pStencilProgam->LinkProgram();
+	m_pShaderPrograms->push_back(pStencilProgam);
 
 	// You can follow this pattern to load additional shaders
 
@@ -276,13 +287,20 @@ void Game::Initialise()
 
 }
 
+
+
 // Render method runs repeatedly in a loop
 void Game::Render() 
 {
 	
 	// Clear the buffers and enable depth testing (z-buffering)
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	//
+
 
 	// Set up a matrix stack
 	glutil::MatrixStack modelViewMatrixStack;
@@ -514,6 +532,9 @@ void Game::Render()
 	m_object->Render();
 	modelViewMatrixStack.Pop();
 
+
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilMask(0xFF);
 	// Render the my Obstacle
 	for (Obstacle* o : m_obstacles) {
 		modelViewMatrixStack.Push();
@@ -528,10 +549,34 @@ void Game::Render()
 		modelViewMatrixStack.Pop();
 	}
 	
+	glStencilFunc(GL_NOTEQUAL, 1, 255);
+	glStencilMask(0x00);
+	glDisable(GL_DEPTH_TEST);
+	
+	pMainProgram = (*m_pShaderPrograms)[4];
+	pMainProgram->UseProgram();
+	// Set the projection matrix
+	pMainProgram->SetUniform("projection", m_pCamera->GetPerspectiveProjectionMatrix());
 
 
-
-
+	// Render the my Obstacle with outline
+	for (Obstacle* o : m_obstacles) {
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(o->m_pos.x, o->m_pos.y-0.5, o->m_pos.z);
+		modelViewMatrixStack *= o->m_rotation;
+		modelViewMatrixStack.Scale(6.0f);
+		pMainProgram->SetUniform("modelView", modelViewMatrixStack.Top());
+		//pMainProgram->SetUniform("normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		o->Render();
+		modelViewMatrixStack.Pop();
+	}
+	
+	glStencilFunc(GL_ALWAYS, 0, 0xFF);
+	glStencilMask(0xFF);
+	glEnable(GL_DEPTH_TEST);
+	
 
 
 		
@@ -621,11 +666,11 @@ void Game::Update()
 	}
 	if (m_cameraMode == Game::FirstPerson) {
 		
-		//glm::vec3 newPos =  p + (10.0f * B) - (5.0f * T);
-		//m_pCamera->Set(newPos,  p + (20.0f * T) + (4.0f * B), B);
+		glm::vec3 newPos = m_kartPos + (10.0f * B) - (5.0f * T);
+		m_pCamera->Set(newPos, m_kartPos  + (20.0f * T) + (4.0f * B), B);
 
-		glm::vec3 newPos = m_kartPos + (7.0f * B) - (4.0f * T);
-		m_pCamera->Set(newPos, m_kartPos + (20.0f * T) + (10.0f * B), B);
+		//glm::vec3 newPos = m_kartPos + (7.0f * B) - (4.0f * T);
+		//m_pCamera->Set(newPos, m_kartPos + (20.0f * T) + (10.0f * B), B);
 	}
 
 	if (m_cameraMode == Game::ThirdPerson) {

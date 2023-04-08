@@ -180,6 +180,8 @@
     <None Include="resources\shaders\mainShader.vert" />
     <None Include="resources\shaders\myShader.frag" />
     <None Include="resources\shaders\myShader.vert" />
+    <None Include="resources\shaders\stencilShader.frag" />
+    <None Include="resources\shaders\stencilShader.vert" />
     <None Include="resources\shaders\textShader.frag" />
     <None Include="resources\shaders\textShader.vert" />
   </ItemGroup>
