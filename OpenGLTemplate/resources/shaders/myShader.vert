@@ -17,13 +17,17 @@ uniform mat4 projection;
 uniform mat3 normalMatrix;
 uniform mat4 inverseViewMatrix;
 
+
+out vec3 n;
+out vec4 p;
+
 void main()
 {
 	gl_Position = projection * modelView * vec4(inPos, 1.0);
 
-    vec3 n = normalize(normalMatrix * inNormal);
-    vec3 p = (modelView * vec4(inPos, 1.0f)).xyz;
-    reflected = (inverseViewMatrix * vec4(reflect(p, n), 1)).xyz;
+    n = normalize(normalMatrix * inNormal);
+    p = (modelView * vec4(inPos, 1.0f)).xyzw;
+    //reflected = (inverseViewMatrix * vec4(reflect(p, n), 1)).xyz;
 
     texCoord=inTex;
     colour = vec4(incolour,1.0f);

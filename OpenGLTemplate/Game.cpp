@@ -497,9 +497,32 @@ void Game::RenderScene(int pass)
 	// Use the my shader program 
 	pMainProgram = (*m_pShaderPrograms)[2];
 	pMainProgram->UseProgram();
-	pMainProgram->SetUniform("bUseTexture", true);
 	pMainProgram->SetUniform("sampler0", 0);
-	pMainProgram->SetUniform("cubeMapTex", 1);
+
+	// Set light and materials in main shader program
+	lightPosition1 = glm::vec4(-100, 100, -100, 1); // Position of light source *in world coordinates*
+	pMainProgram->SetUniform("worldLight.position", viewMatrix * lightPosition1); // Position of light source *in eye coordinates*
+	pMainProgram->SetUniform("worldLight.La", glm::vec3(0.3));		// Ambient colour of light
+	pMainProgram->SetUniform("worldLight.Ld", glm::vec3(.8f));		// Diffuse colour of light
+	pMainProgram->SetUniform("worldLight.Ls", glm::vec3(1.0f));		// Specular colour of light
+	pMainProgram->SetUniform("material1.Ma", glm::vec3(1.0f));	// Ambient material reflectance
+	pMainProgram->SetUniform("material1.Md", glm::vec3(1.0f));	// Diffuse material reflectance
+	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance
+	pMainProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
+
+
+	// Set light and materials in main shader program
+	m_carLightpos; // Position of light source *in world coordinates*
+	pMainProgram->SetUniform("carLight.position", viewMatrix * m_carLightpos); // Position of light source *in eye coordinates*
+	pMainProgram->SetUniform("carLight.La", glm::vec3(0));		// Ambient colour of light
+	pMainProgram->SetUniform("carLight.Ld", glm::vec3(10.0f));		// Diffuse colour of light
+	pMainProgram->SetUniform("carLight.Ls", glm::vec3(5.0f));		// Specular colour of light
+	pMainProgram->SetUniform("carLight.direction", glm::normalize(viewNormalMatrix * m_carLightDirection));		// Specular colour of light
+	pMainProgram->SetUniform("carLight.exponent", 20.f);		// exponent of light
+	pMainProgram->SetUniform("carLight.constant", 1.0f);
+	pMainProgram->SetUniform("carLight.linear", 0.01f);
+	pMainProgram->SetUniform("carLight.cutoff", 30.0f);		// Specular colour of light
+	pMainProgram->SetUniform("carLight.attenuationExp;", 0.00001f);		// Specular colour of light
 	// Note: cubemap and non-cubemap textures should not be mixed in the same texture unit.  Setting unit 10 to be a cubemap texture.
 
 	//pMainProgram->SetUniform("CubeMapTex", cubeMapTextureUnit);
