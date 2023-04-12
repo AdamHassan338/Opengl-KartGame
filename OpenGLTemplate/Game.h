@@ -122,7 +122,8 @@ private:
 	//camera stuff
 	enum camreaModes {  Freecam, 
 						FirstPerson,
-						ThirdPerson};
+						ThirdPerson,
+						TopDown};
 	int m_cameraMode;
 
 	std::vector<glm::vec3> oldProps;

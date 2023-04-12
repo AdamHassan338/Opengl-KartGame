@@ -664,6 +664,7 @@ void Game::Update()
 
 	if (m_cameraMode == Game::Freecam) {
 		//Update the camera using the amount of time that has elapsed to avoid framerate dependent motion
+		m_pCamera->setUpVector(glm::vec3(0, 1, 0));
 		m_pCamera->Update(m_dt);
 	}
 	if (m_cameraMode == Game::FirstPerson) {
@@ -679,8 +680,13 @@ void Game::Update()
 		glm::vec3 newPos = m_kartPos + (20.0f * B) - (30.0f * T);
 		m_pCamera->Set(newPos, m_kartPos + (20.0f * T), B);
 	}
+
+	if (m_cameraMode == Game::TopDown) {
+		glm::vec3 newPos = m_kartPos + (200.0f * B);
+		m_pCamera->Set(newPos, m_kartPos, T);
+	}
 	
-	
+
 
 	
 
@@ -942,6 +948,9 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 			break;
 		case '3':
 			m_cameraMode = Game::ThirdPerson;
+			break;
+		case '4':
+			m_cameraMode = Game::TopDown;
 			break;
 		}
 		

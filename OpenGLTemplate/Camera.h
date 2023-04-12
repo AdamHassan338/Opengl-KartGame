@@ -47,6 +47,8 @@ public:
 
 	glm::mat3 ComputeNormalMatrix(const glm::mat4 &modelViewMatrix);
 
+	void setUpVector(glm::vec3 up) { m_upVector = up; }
+
 private:
 	glm::vec3 m_position;			// The position of the camera's centre of projection
 	glm::vec3 m_view;				// The camera's viewpoint (point where the camera is looking)
