@@ -57,6 +57,8 @@ private:
 	CCube* m_pCube;
 	Quad* m_quad;
 	CFrameBufferObject* m_pFBO;
+	CFrameBufferObject* m_currentFrameFBO;
+	CFrameBufferObject* m_lastFrameFBO;
 
 	//Obstacle* m_obstacle;
 	vector<Obstacle*> m_obstacles;

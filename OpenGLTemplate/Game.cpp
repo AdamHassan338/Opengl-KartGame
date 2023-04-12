@@ -66,6 +66,8 @@ Game::Game()
 	m_pCube = NULL;
 	m_quad = NULL;
 	m_pFBO = NULL;
+	m_currentFrameFBO = NULL;
+	m_lastFrameFBO = NULL;
 
 	m_dt = 0.0;
 	m_framesPerSecond = 0;
@@ -92,6 +94,8 @@ Game::~Game()
 	delete m_pCube;
 	delete m_quad;
 	delete m_pFBO;
+	delete m_currentFrameFBO;
+	delete m_lastFrameFBO;
 	//delete m_obstacles;
 
 	if (m_pShaderPrograms != NULL) {
@@ -145,6 +149,8 @@ void Game::Initialise()
 	m_pCube = new CCube;
 	m_quad = new Quad;
 	m_pFBO = new CFrameBufferObject;
+	m_currentFrameFBO = new CFrameBufferObject;
+	m_lastFrameFBO = new CFrameBufferObject;
 	//m_obstacle = new Obstacle;
 	//m_pCatmullRom->CreatePath(p0,p1,p2,p3);
 	m_pCatmullRom->CreateCentreline();
@@ -192,6 +198,8 @@ void Game::Initialise()
 	sShaderFileNames.push_back("hudShader.frag");
 	sShaderFileNames.push_back("stencilShader.vert");
 	sShaderFileNames.push_back("stencilShader.frag");
+	sShaderFileNames.push_back("mBlurShader.vert");
+	sShaderFileNames.push_back("mBlurShader.frag");
 
 
 	for (int i = 0; i < (int) sShaderFileNames.size(); i++) {
@@ -251,6 +259,15 @@ void Game::Initialise()
 	pStencilProgam->LinkProgram();
 	m_pShaderPrograms->push_back(pStencilProgam);
 
+
+	// Create a shader program for my motionblur
+	CShaderProgram* pmBlurProgam = new CShaderProgram;
+	pmBlurProgam->CreateProgram();
+	pmBlurProgam->AddShaderToProgram(&shShaders[10]);
+	pmBlurProgam->AddShaderToProgram(&shShaders[11]);
+	pmBlurProgam->LinkProgram();
+	m_pShaderPrograms->push_back(pmBlurProgam);
+
 	// You can follow this pattern to load additional shaders
 
 	// Create the skybox
@@ -288,6 +305,8 @@ void Game::Initialise()
 
 
 	m_pFBO->Create(width, height);
+	m_currentFrameFBO->Create(width, height);
+	m_lastFrameFBO->Create(width, height);
 }
 
 
@@ -295,11 +314,35 @@ void Game::Initialise()
 // Render method runs repeatedly in a loop
 void Game::Render() 
 {
-	
+	static int a = 0;
+	//render top down view
 	m_pFBO->Bind();
 	RenderScene(0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if (m_end) {
+		m_currentFrameFBO->Bind();
+	}
+	else {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 	RenderScene(1);
+
+	if(m_end){
+		//render full screen quad with blur
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		CShaderProgram* pmBlurProgam = (*m_pShaderPrograms)[5];
+
+		// Use the Quad shader program
+		pmBlurProgam->UseProgram();
+		//pmBlurProgam->SetUniform("currentFrame", 1);
+		pmBlurProgam->SetUniform("sampler0", 0);
+		glDisable(GL_DEPTH_TEST);
+		glutil::MatrixStack modelMatrix;
+		modelMatrix.SetIdentity();
+		m_currentFrameFBO->BindTexture(0);
+		m_quad->RenderNoTexture();
+		//finish fbo
+		*m_lastFrameFBO = *m_currentFrameFBO;
+	}
 		
 	// Draw the 2D graphics after the 3D graphics
 	DisplayFrameRate();
@@ -772,14 +815,14 @@ void Game::DrawHud()
 	CShaderProgram* fontProgram = (*m_pShaderPrograms)[1];
 
 	RECT dimensions = m_gameWindow.GetDimensions();
-	int height = dimensions.bottom - dimensions.top;
-	int width = dimensions.right - dimensions.left;
+	float width = dimensions.right - dimensions.left;
+	float height = dimensions.bottom - dimensions.top;
 	m_gameWindow.SCREEN_HEIGHT;
 
 	glm::mat4 model = glm::mat4(1);
 	glm::mat4 view = glm::mat4(1);
-	
-	
+
+
 
 
 

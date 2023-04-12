@@ -186,5 +186,11 @@
     <None Include="resources\shaders\stencilShader.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="resources\shaders\mBlurShader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="resources\shaders\mBlurShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
