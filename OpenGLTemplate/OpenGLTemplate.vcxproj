@@ -133,6 +133,7 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Cubemap.h" />
+    <ClInclude Include="FastNoiseLite.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="FreeTypeFont.h" />
     <ClInclude Include="Game.h" />

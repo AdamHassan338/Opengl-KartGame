@@ -605,6 +605,7 @@ void Game::RenderScene(int pass)
 
 		modelViewMatrixStack.Pop();
 	}
+	
 
 	glStencilFunc(GL_NOTEQUAL, 1, 255);
 	glStencilMask(0x00);
@@ -647,8 +648,12 @@ void Game::collide() {
 			m_lives--;	
 			it = m_obstacles.erase(it);
 			printf("hit\n");
-			if (m_lives <= 0)
+			if (m_lives <= 0) {
 				m_end = true;
+			}
+			else {
+				m_pCamera->SetShake(10000.0f, 0.05f ,1000.0);
+			}
 			
 		}
 		else {
@@ -737,6 +742,7 @@ void Game::Update()
 		
 		glm::vec3 newPos = m_kartPos + (10.0f * B) - (5.0f * T);
 		m_pCamera->Set(newPos, m_kartPos  + (20.0f * T) + (4.0f * B), B);
+		m_pCamera->Shake(m_dt, m_pHighResolutionTimer->Elapsed());
 
 		//glm::vec3 newPos = m_kartPos + (7.0f * B) - (4.0f * T);
 		//m_pCamera->Set(newPos, m_kartPos + (20.0f * T) + (10.0f * B), B);
@@ -745,6 +751,7 @@ void Game::Update()
 	if (m_cameraMode == Game::ThirdPerson) {
 		glm::vec3 newPos = m_kartPos + (20.0f * B) - (30.0f * T);
 		m_pCamera->Set(newPos, m_kartPos + (20.0f * T), B);
+		m_pCamera->Shake(m_dt, m_pHighResolutionTimer->Elapsed());
 	}
 
 	if (m_cameraMode == Game::TopDown) {

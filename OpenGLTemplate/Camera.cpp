@@ -8,6 +8,11 @@ CCamera::CCamera()
 	m_view = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 	m_speed = 0.025f;
+
+	m_noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	
+	m_noise.SetFractalOctaves(2);
+	m_noise.SetFrequency(0.02);
 }
 CCamera::~CCamera()
 {}
@@ -196,3 +201,29 @@ glm::mat3 CCamera::ComputeNormalMatrix(const glm::mat4 &modelViewMatrix)
 	return glm::transpose(glm::inverse(glm::mat3(modelViewMatrix)));
 }
 
+// Shake camera
+void CCamera::SetShake(float ammount, float speed,double time)
+{
+	m_shakeAmmount = ammount;
+	m_shakeDuration = time;
+	m_shakeSpeed = speed;
+	m_elapsedShakeTime = 0;
+}
+
+// Shake camera
+void CCamera::Shake(double dt, double elapsed)
+{
+	if (m_elapsedShakeTime < m_shakeDuration) {
+		m_shakeAmmount = lerp(m_shakeAmmount, 0.0f, m_elapsedShakeTime / m_shakeDuration);//interpolate shake ammout to slowly reduce shake
+
+        float shakeOffsetX = m_noise.GetNoise((float)elapsed* m_shakeSpeed, 0.0f) * m_shakeAmmount;
+        float shakeOffsetY = m_noise.GetNoise(0.0f, (float)elapsed* m_shakeSpeed) * m_shakeAmmount;
+
+		m_position += glm::vec3(shakeOffsetX, shakeOffsetY, 0);
+		m_elapsedShakeTime += dt;	
+	}
+}
+
+float lerp(float a, float b, float t) {
+	return a + t * (b - a);
+}

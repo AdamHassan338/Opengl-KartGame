@@ -235,7 +235,7 @@ void MyObject::combine()
 		m_data.push_back(1.0f);//B
 		list.push_back(std::to_string((int)m_indices.at(row + column) + 1) + "/6/" + std::to_string(i + 1));
 		finalindices.push_back(row + column);
-		column++;
+		//column++;
 		
 
 

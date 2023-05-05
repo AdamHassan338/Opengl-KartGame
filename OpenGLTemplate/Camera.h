@@ -3,6 +3,9 @@
 #include "./include/glm/gtc/type_ptr.hpp"
 #include "./include/glm/gtc/matrix_transform.hpp"
 #include <vector>
+#include <random>
+#include "FastNoiseLite.h"
+#include <stdio.h>
 
 class CCamera {
 public:
@@ -38,6 +41,11 @@ public:
 	// Update the camera
 	void Update(double dt);
 
+	// Shake camera
+	void SetShake(float ammount,float speed, double time);
+
+	void Shake(double dt, double elapsed);
+
 	// Set the projection matrices
 	void SetPerspectiveProjectionMatrix(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane);
 	
@@ -59,4 +67,14 @@ private:
 
 	glm::mat4 m_perspectiveProjectionMatrix;		// Perspective projection matrix
 	glm::mat4 m_orthographicProjectionMatrix;		// Orthographic projection matrix
+
+	double m_elapsedShakeTime = 0;
+	
+	double m_shakeDuration = 0;
+	float m_shakeAmmount = 0;
+	float m_shakeSpeed = 0;
+
+	FastNoiseLite m_noise;
+
+
 };
