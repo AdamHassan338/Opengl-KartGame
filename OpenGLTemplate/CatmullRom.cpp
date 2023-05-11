@@ -65,6 +65,22 @@ void CCatmullRom::SetControlPoints()
 
 
 	// Optionally, set upvectors (m_controlUpVectors, one for each control point as well)
+
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(.3, .6, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, .6, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
+	m_controlUpVectors.push_back(glm::vec3(0, 1, 0));
 }
 
 
@@ -236,11 +252,12 @@ void CCatmullRom::CreateOffsetCurves(float width)
 	for (int i = 0; i < m_centrelinePoints.size(); i++) {
 		glm::vec3 p = m_centrelinePoints[i];
 		glm::vec3 pNext = m_centrelinePoints[(i+1) % m_centrelinePoints.size()];
-
+		glm::vec3 up = m_controlUpVectors[(i + 1) % m_controlUpVectors.size()];
+		normal = up;
 		
 
 		glm::vec3 t = glm::normalize(pNext - p);
-		glm::vec3 n = glm::normalize(glm::cross(t, glm::vec3(0, 1, 0)));
+		glm::vec3 n = glm::normalize(glm::cross(t, up));
 		glm::vec3 b = glm::normalize(glm::cross(n, t));
 		
 		glm::vec3 l = p - (width / 2) * n;

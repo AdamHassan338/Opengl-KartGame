@@ -685,12 +685,13 @@ void Game::Update()
 	m_currentDistance += m_dt * m_speed;
 	glm::vec3 p;
 	glm::vec3 pNext;
-	m_pCatmullRom->Sample(m_currentDistance, p);
+	glm::vec3 up;
+	m_pCatmullRom->Sample(m_currentDistance, p,up);
 	m_pCatmullRom->Sample(m_currentDistance + 1.0f, pNext);
 
 	glm::vec3 T = glm::normalize(pNext - p);
 
-	glm::vec3 N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
+	glm::vec3 N = glm::normalize(glm::cross(T, up));
 	glm::vec3 B = glm::normalize(glm::cross(N, T));
 
 	float w = 40.0f;//track width
@@ -743,7 +744,7 @@ void Game::Update()
 		glm::vec3 newPos = m_kartPos + (10.0f * B) - (5.0f * T);
 		m_pCamera->Set(newPos, m_kartPos  + (20.0f * T) + (4.0f * B), B);
 		m_pCamera->Shake(m_dt, m_pHighResolutionTimer->Elapsed());
-
+		m_pCamera->setUpVector(up);
 		//glm::vec3 newPos = m_kartPos + (7.0f * B) - (4.0f * T);
 		//m_pCamera->Set(newPos, m_kartPos + (20.0f * T) + (10.0f * B), B);
 	}
