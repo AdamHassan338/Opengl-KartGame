@@ -209,6 +209,9 @@ void CCamera::SetShake(float ammount, float speed,double time)
 	m_shakeSpeed = speed;
 	m_elapsedShakeTime = 0;
 }
+float lerp(float a, float b, float t) {
+	return a + t * (b - a);
+}
 
 // Shake camera
 void CCamera::Shake(double dt, double elapsed)
@@ -224,6 +227,3 @@ void CCamera::Shake(double dt, double elapsed)
 	}
 }
 
-float lerp(float a, float b, float t) {
-	return a + t * (b - a);
-}

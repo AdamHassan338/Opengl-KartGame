@@ -16,16 +16,19 @@ void main()
     vec2 texeloffset = 1.0 / textureSize(sampler0, 0);
     vec3 sum;
     vec2 kernalOffset = vec2(-1,1);
-    for(int i = 0;i<9;i++){
-        sum += texture(sampler0, vTexcoord + kernalOffset*texeloffset).rgb * weight[i];
-        if(i%2==0){
-            kernalOffset.y-=1;
-            kernalOffset.x=-1;
+    for(int i=0; i<10; i++){
+        for(int i = 0;i<9;i++){
+            sum += texture(sampler0, vTexcoord + kernalOffset*texeloffset).rgb * weight[i];
+            if(i%2==0){
+                kernalOffset.y-=1;
+                kernalOffset.x=-1;
         }else{
-            kernalOffset.x+=1; 
+                kernalOffset.x+=1; 
         }
+    }
+
     }
    
 
-    FragColor = vec4(sum, 1.0);
+    FragColor = vec4(sum/10, 1.0);
 }
